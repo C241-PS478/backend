@@ -14,10 +14,10 @@ model User {
   id          String    @id @default(uuid())
   username    String
   password    String
-  email       String
-  name        String
-  isAdmin     Boolean
-  phoneNumber String
+  email       String    @default("")
+  name        String    @default("")
+  isAdmin     Boolean   @default(false)
+  phoneNumber String    @default("")
   address     Address[]
 }
 

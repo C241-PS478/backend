@@ -14,19 +14,20 @@ const init = async () => {
 
 	server.route(routes)
 
-	server.ext("onPreResponse", function (request, h) {
-		const response = request.response
-		const output = response.output
-		if (response.isBoom) {
-			const newResponse = h.response({
-				message: output.payload.message,
-				error: output.payload.error
-			})
-			newResponse.code(output.statusCode)
-			return newResponse
-		}
-		return h.continue
-	})
+	// server.ext("onPreResponse", function (request, h) {
+	// 	const response = request.response
+	// 	const output = response.output
+	// 	if (response.isBoom) {
+	// 		console.log(output)
+	// 		const newResponse = h.response({
+	// 			message: output.payload.message,
+	// 			error: output.payload.error
+	// 		})
+	// 		newResponse.code(output.statusCode)
+	// 		return newResponse
+	// 	}
+	// 	return h.continue
+	// })
 
 	await server.start()
 	// eslint-disable-next-line no-console

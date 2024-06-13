@@ -1,8 +1,8 @@
 // https://www.prisma.io/docs/getting-started/quickstart
 
-// import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 
-// const prisma = new PrismaClient()
+export const prisma = new PrismaClient()
 
 // async function main() {
 // 	const user = await prisma.user.create({
