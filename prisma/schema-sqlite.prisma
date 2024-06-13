@@ -94,13 +94,14 @@ model WaterSourceComment {
 // Articles (Berita)
 
 model Article {
-  id           String   @id @default(uuid())
-  author       User?    @relation(fields: [authorId], references: [id])
-  authorId     String?
-  dateCreated  DateTime @default(now())
-  dateModified DateTime @default(now())
-  title        String   @default("")
-  content      String   @default("")
+  id            String   @id @default(uuid())
+  author        User?    @relation(fields: [authorId], references: [id])
+  authorId      String?
+  dateCreated   DateTime @default(now())
+  dateModified  DateTime @default(now())
+  title         String   @default("")
+  content       String   @default("")
+  coverImageUrl String?
 }
 
 // Simple E-Commerce
@@ -109,7 +110,7 @@ model Product {
   id          String   @id @default(uuid())
   name        String
   price       Float
-  image_url   String
+  imageUrl    String
   category    String
   dateCreated DateTime @default(now())
   url         String
@@ -126,7 +127,7 @@ model Badges {
   id          String      @id @default(uuid())
   name        String
   description String
-  image_url   String
+  imageUrl    String
   userBadges  UserBadge[]
 }
 

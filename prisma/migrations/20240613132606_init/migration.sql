@@ -1,4 +1,28 @@
 -- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "username" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "email" TEXT NOT NULL DEFAULT '',
+    "name" TEXT NOT NULL DEFAULT '',
+    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "phoneNumber" TEXT NOT NULL DEFAULT ''
+);
+
+-- CreateTable
+CREATE TABLE "Address" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "longitude" DATETIME NOT NULL,
+    "latitude" DATETIME NOT NULL,
+    "province" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "village" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "userId" TEXT,
+    CONSTRAINT "Address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "WaterPrediction" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "authorId" TEXT,
@@ -51,6 +75,7 @@ CREATE TABLE "Article" (
     "dateModified" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "title" TEXT NOT NULL DEFAULT '',
     "content" TEXT NOT NULL DEFAULT '',
+    "coverImageUrl" TEXT,
     CONSTRAINT "Article_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
@@ -59,7 +84,7 @@ CREATE TABLE "Product" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "price" REAL NOT NULL,
-    "image_url" TEXT NOT NULL,
+    "imageUrl" TEXT NOT NULL,
     "category" TEXT NOT NULL,
     "dateCreated" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "url" TEXT NOT NULL
@@ -76,7 +101,7 @@ CREATE TABLE "Badges" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "image_url" TEXT NOT NULL
+    "imageUrl" TEXT NOT NULL
 );
 
 -- CreateTable
