@@ -3,10 +3,10 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "isAdmin" BOOLEAN NOT NULL,
-    "phoneNumber" TEXT NOT NULL
+    "email" TEXT NOT NULL DEFAULT '',
+    "name" TEXT NOT NULL DEFAULT '',
+    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "phoneNumber" TEXT NOT NULL DEFAULT ''
 );
 
 -- CreateTable

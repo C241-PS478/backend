@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  // output   = "./generated/sqlite"
 }
 
 datasource db {
@@ -10,25 +11,130 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Shared
+
 model User {
-  id          String    @id @default(uuid())
-  username    String
-  password    String
-  email       String    @default("")
-  name        String    @default("")
-  isAdmin     Boolean   @default(false)
-  phoneNumber String    @default("")
-  address     Address[]
+  id                  String               @id @default(uuid())
+  username            String
+  password            String
+  email               String               @default("")
+  name                String               @default("")
+  isAdmin             Boolean              @default(false)
+  phoneNumber         String               @default("")
+  address             Address[]
+  waterPredictions    WaterPrediction[]
+  waterSources        WaterSource[]
+  waterSourcesLikes   WaterSourcesLike[]
+  articles            Article[]
+  gamifcationStats    GamifcationStat[]
+  userBadges          UserBadge[]
+  waterSourceComments WaterSourceComment[]
 }
 
 model Address {
-  id        String   @id @default(uuid())
-  longitude DateTime
-  latitude  DateTime
-  province  String
-  city      String
-  village   String
-  address   String
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?
+  id           String        @id @default(uuid())
+  longitude    DateTime
+  latitude     DateTime
+  province     String
+  city         String
+  village      String
+  address      String
+  user         User?         @relation(fields: [userId], references: [id])
+  userId       String?
+  WaterSources WaterSource[]
+}
+
+// Deteksi Kejernihan Air
+
+model WaterPrediction {
+  id          String   @id @default(uuid())
+  author      User?    @relation(fields: [authorId], references: [id])
+  authorId    String?
+  image_url   String
+  prediction  String
+  dateCreated DateTime @default(now())
+}
+
+// Geolocation of Water Sources and Quantities
+
+model WaterSource {
+  id                  String               @id @default(uuid())
+  author              User?                @relation(fields: [authorId], references: [id])
+  authorId            String?
+  dateCreated         DateTime             @default(now())
+  dateModified        DateTime             @default(now())
+  address             Address              @relation(fields: [addressId], references: [id])
+  description         String
+  state               String
+  addressId           String
+  waterSourceLikes    WaterSourcesLike[]
+  waterSourceComments WaterSourceComment[]
+}
+
+model WaterSourcesLike {
+  waterSource   WaterSource @relation(fields: [waterSourceId], references: [id])
+  waterSourceId String
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+
+  @@id([waterSourceId, userId])
+}
+
+model WaterSourceComment {
+  id            String      @id @default(uuid())
+  author        User?       @relation(fields: [authorId], references: [id])
+  authorId      String?
+  dateCreated   DateTime    @default(now())
+  dateModified  DateTime    @default(now())
+  content       String
+  waterSource   WaterSource @relation(fields: [waterSourceId], references: [id])
+  waterSourceId String
+}
+
+// Articles (Berita)
+
+model Article {
+  id           String   @id @default(uuid())
+  author       User?    @relation(fields: [authorId], references: [id])
+  authorId     String?
+  dateCreated  DateTime @default(now())
+  dateModified DateTime @default(now())
+  title        String   @default("")
+  content      String   @default("")
+}
+
+// Simple E-Commerce
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  image_url   String
+  category    String
+  dateCreated DateTime @default(now())
+  url         String
+}
+
+// Gamification
+
+model GamifcationStat {
+  user   User?  @relation(fields: [userId], references: [id])
+  userId String @id
+}
+
+model Badges {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  image_url   String
+  userBadges  UserBadge[]
+}
+
+model UserBadge {
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  badge   Badges @relation(fields: [badgeId], references: [id])
+  badgeId String
+
+  @@id([userId, badgeId])
 }
