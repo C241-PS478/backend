@@ -1,30 +1,31 @@
 import { placeholderHandler } from "../handlers/index.js"
+import { createSourceHandler, deleteSourceHandler, getAllSourcesHandler, getSourceHandler, updateSourceHandler } from "../handlers/sources.js"
 
 export default [
 	{
 		method: "GET",
 		path: "/sources",
-		handler: placeholderHandler,
+		handler: getAllSourcesHandler,
 	},
 	{
 		method: "POST",
 		path: "/sources",
-		handler: placeholderHandler,
+		handler: getSourceHandler,
 	},
 	{
 		method: "GET",
 		path: "/sources/{id}",
-		handler: placeholderHandler,
+		handler: createSourceHandler,
 	},
 	{
 		method: "PUT",
 		path: "/sources/{id}",
-		handler: placeholderHandler,
+		handler: updateSourceHandler,
 	},
 	{
 		method: "DELETE",
 		path: "/sources/{id}",
-		handler: placeholderHandler,
+		handler: deleteSourceHandler,
 	},
 	{
 		method: "GET",

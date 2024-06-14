@@ -7,6 +7,7 @@
     "start": "nodemon ./src/server/server.js"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.0",
     "@hapi/hapi": "^21.3.9",
     "@prisma/client": "^5.15.0",
     "prisma": "^5.15.0",

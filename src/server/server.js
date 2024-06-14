@@ -1,8 +1,10 @@
 import { server as _server } from "@hapi/hapi"
 import routes from "./routes/index.js"
 import { generateInternalServerErrorResponse } from "./handlers/index.js"
+import { getReverseGeocode } from "../services/googleMaps.js"
 
 const init = async () => {
+
 	const server = _server({
 		port: 3000,
 		host: "localhost",

@@ -35,13 +35,15 @@ model Address {
   id           String        @id @default(uuid())
   longitude    DateTime
   latitude     DateTime
+  country      String
   province     String
   city         String
+  district     String
   village      String
   address      String
   user         User?         @relation(fields: [userId], references: [id])
   userId       String?
-  WaterSources WaterSource[]
+  waterSources WaterSource[]
 }
 
 // Deteksi Kejernihan Air
@@ -64,7 +66,7 @@ model WaterSource {
   dateCreated         DateTime             @default(now())
   dateModified        DateTime             @default(now())
   address             Address              @relation(fields: [addressId], references: [id])
-  description         String
+  description         String               @default("")
   state               String
   addressId           String
   waterSourceLikes    WaterSourcesLike[]
