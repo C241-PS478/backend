@@ -50,8 +50,8 @@ model WaterPrediction {
   id          String   @id @default(uuid())
   author      User?    @relation(fields: [authorId], references: [id])
   authorId    String?
-  image_url   String
-  prediction  String
+  imageUrl    String
+  prediction  Float
   dateCreated DateTime @default(now())
 }
 

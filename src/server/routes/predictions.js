@@ -1,34 +1,40 @@
-import { placeholderHandler } from "../handlers/index.js"
+import { createPredictionHandler, deletePredictionHandler, getAllPredictionsHandler, getPredictionHandler, predictHandler, updatePredictionHandler } from "../handlers/predictions.js"
 
 export default [
 	{
 		method: "POST",
 		path: "/predict",
-		handler: placeholderHandler,
+		handler: predictHandler,
+		options: {
+			payload: {
+				allow: 'multipart/form-data',
+				multipart: true
+			}
+		}
 	},
 	{
 		method: "GET",
 		path: "/predictions",
-		handler: placeholderHandler,
+		handler: getAllPredictionsHandler,
 	},
 	{
 		method: "POST",
 		path: "/predictions",
-		handler: placeholderHandler,
+		handler: createPredictionHandler,
 	},
 	{
 		method: "GET",
 		path: "/predictions/{id}",
-		handler: placeholderHandler,
+		handler: getPredictionHandler,
 	},
 	{
 		method: "PUT",
 		path: "/predictions/{id}",
-		handler: placeholderHandler,
+		handler: updatePredictionHandler,
 	},
 	{
 		method: "DELETE",
 		path: "/predictions/{id}",
-		handler: placeholderHandler,
+		handler: deletePredictionHandler,
 	},
 ]

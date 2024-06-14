@@ -26,8 +26,8 @@ CREATE TABLE "Address" (
 CREATE TABLE "WaterPrediction" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "authorId" TEXT,
-    "image_url" TEXT NOT NULL,
-    "prediction" TEXT NOT NULL,
+    "imageUrl" TEXT NOT NULL,
+    "prediction" REAL NOT NULL,
     "dateCreated" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "WaterPrediction_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
