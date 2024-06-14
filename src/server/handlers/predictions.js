@@ -2,6 +2,7 @@
 import hapi from "@hapi/hapi"
 import { prisma } from "../../services/databaseConnect.js"
 import { generateWrongParameterResponse } from "./index.js"
+import { uploadBufferToCloudStorage } from "../../services/cloudStorage.js"
 
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
@@ -21,8 +22,6 @@ export const predictHandler = async (request, h) => {
 		return response
 	}
 
-	// TODO save image to GCS
-
 	// TODO move this to services folder
 	let formData = new FormData()
 	formData.append('image', new Blob([image]))
@@ -34,10 +33,12 @@ export const predictHandler = async (request, h) => {
 
 	const prediction = mlResponse.data.prediction
 
+	const imageUrl = await uploadBufferToCloudStorage(image, "prediction-images/")
+
 	const predictionData = await prisma.waterPrediction.create({
 		data: {
 			// "author": "", // TODO
-			"imageUrl": "", // TODO get image url from GCS
+			"imageUrl": imageUrl, // TODO get image url from GCS
 			"prediction": prediction
 		}
 	})

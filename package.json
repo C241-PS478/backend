@@ -7,9 +7,11 @@
     "start": "nodemon ./src/server/server.js"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.11.2",
     "@googlemaps/google-maps-services-js": "^3.4.0",
     "@hapi/hapi": "^21.3.9",
     "@prisma/client": "^5.15.0",
+    "firebase-admin": "^12.1.1",
     "prisma": "^5.15.0",
     "slugify": "^1.6.6"
   },

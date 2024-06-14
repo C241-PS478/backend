@@ -1,8 +1,9 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "firebaseId" TEXT,
     "username" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "email" TEXT NOT NULL DEFAULT '',
     "name" TEXT NOT NULL DEFAULT '',
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
