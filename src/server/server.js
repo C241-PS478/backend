@@ -3,7 +3,7 @@ import routes from "./routes/index.js"
 
 const init = async () => {
 	const server = _server({
-		port: 5000,
+		port: 3000,
 		host: "localhost",
 		routes: {
 			cors: {
@@ -31,7 +31,7 @@ const init = async () => {
 
 	await server.start()
 	// eslint-disable-next-line no-console
-	console.log(`Server berjalan pada ${server.info.uri}`)
+	console.info(`Server running on ${server.info.uri}.`)
 }
 
 init()
