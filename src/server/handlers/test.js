@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import hapi from "@hapi/hapi"
-import { prisma } from "../../services/databaseConnect.js"
+import { prisma } from "../../services/databaseConnector.js"
 
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 

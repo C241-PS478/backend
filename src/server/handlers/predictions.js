@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import hapi from "@hapi/hapi"
-import { prisma } from "../../services/databaseConnect.js"
+import { prisma } from "../../services/databaseConnector.js"
 import { generateWrongParameterResponse } from "./index.js"
-import { uploadBufferToCloudStorage } from "../../services/cloudStorage.js"
+import { uploadBufferToCloudStorage } from "../../services/cloudStorageConnector.js"
 
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
@@ -10,7 +10,7 @@ import { uploadBufferToCloudStorage } from "../../services/cloudStorage.js"
  * @returns {hapi.ResponseObject}
  */
 export const predictHandler = async (request, h) => {
-	console.log(request.payload)
+	// console.log(request.payload)
 
 	const image = request.payload.image
 
@@ -23,6 +23,7 @@ export const predictHandler = async (request, h) => {
 	}
 
 	// TODO move this to services folder
+	console.log("!")
 	let formData = new FormData()
 	formData.append('image', new Blob([image]))
 
@@ -33,12 +34,13 @@ export const predictHandler = async (request, h) => {
 
 	const prediction = mlResponse.data.prediction
 
-	const imageUrl = await uploadBufferToCloudStorage(image, "prediction-images/")
+	// const imageUrl = await uploadBufferToCloudStorage(image, "prediction-images/")
+	const imageUrl = "https://example.com/image.jpg"
 
 	const predictionData = await prisma.waterPrediction.create({
 		data: {
 			// "author": "", // TODO
-			"imageUrl": imageUrl, // TODO get image url from GCS
+			"imageUrl": imageUrl,
 			"prediction": prediction
 		}
 	})

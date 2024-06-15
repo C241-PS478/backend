@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import hapi from "@hapi/hapi"
-import { prisma } from "../../services/databaseConnect.js"
+import { prisma } from "../../services/databaseConnector.js"
 import { generateWrongParameterResponse } from "./index.js"
-import { getReverseGeocode } from "../../services/googleMaps.js"
+import { getReverseGeocode } from "../../services/googleMapsApi.js"
 
 
 /**
