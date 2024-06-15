@@ -138,8 +138,6 @@ export const updateSourceHandler = async (request, h) => {
 		}
 	}
 
-	console.log(prediction)
-
 	const response = h.response({
 		message: "Source updated.",
 		data: prediction

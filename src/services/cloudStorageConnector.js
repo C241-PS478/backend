@@ -28,13 +28,7 @@ export const uploadBufferToCloudStorage = async (buffer, pathPrefix) => {
 
 	const destinationFilePath = `${pathPrefix}${fileName}.${fileType}`
 
-	try {
-		await storage.bucket(bucketName).file(destinationFilePath).save(buffer)
-
-		console.log(`File uploaded successfully. File name: ${destinationFilePath}`)
-	} catch (error) {
-		console.error('Error uploading file:', error)
-	}
+	await storage.bucket(bucketName).file(destinationFilePath).save(buffer)
 
 	return `https://storage.googleapis.com/${bucketName}/${destinationFilePath}`
 }
@@ -52,12 +46,5 @@ export const deleteFileFromCloudStorage = async url => {
 	const destinationFilePath = urlSplitted.slice(4).join('/')
 	const bucketName = urlSplitted[3]
 
-	try {
-		await storage.bucket(bucketName).file(`prediction-images/${destinationFilePath}`).delete()
-
-		console.log(`File deleted successfully. File name: ${destinationFilePath}`)
-	} catch (error) {
-		console.error('Error deleting file:', error)
-		throw new Error('Error deleting file')
-	}
+	await storage.bucket(bucketName).file(`prediction-images/${destinationFilePath}`).delete()
 }

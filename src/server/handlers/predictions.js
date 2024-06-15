@@ -10,8 +10,6 @@ import { uploadBufferToCloudStorage } from "../../services/cloudStorageConnector
  * @returns {hapi.ResponseObject}
  */
 export const predictHandler = async (request, h) => {
-	// console.log(request.payload)
-
 	const image = request.payload.image
 
 	if (!image) {
@@ -23,7 +21,6 @@ export const predictHandler = async (request, h) => {
 	}
 
 	// TODO move this to services folder
-	console.log("!")
 	let formData = new FormData()
 	formData.append('image', new Blob([image]))
 
@@ -192,8 +189,6 @@ export const updatePredictionHandler = async (request, h) => {
 			return response
 		}
 	}
-
-	console.log(prediction)
 
 	const response = h.response({
 		message: "Prediction updated.",
