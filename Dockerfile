@@ -4,17 +4,14 @@ ENV NODE_ENV production
 
 WORKDIR /usr/src/app
 
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
+COPY . .
+
+RUN --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
-RUN --mount=type=bind,source=package.json,target=package.json \
-    npm run generate
+RUN npm run generate
 
 USER node
-
-COPY . .
 
 EXPOSE 3000
 
