@@ -28,6 +28,10 @@ export const uploadBufferToCloudStorage = async (buffer, pathPrefix) => {
 
 	const destinationFilePath = `${pathPrefix}${fileName}.${fileType}`
 
+	console.log(fileType)
+	
+	return "https://example.com/image.jpg"
+
 	await storage.bucket(bucketName).file(destinationFilePath).save(buffer)
 
 	return `https://storage.googleapis.com/${bucketName}/${destinationFilePath}`

@@ -1,10 +1,12 @@
-import { server as _server } from "@hapi/hapi"
+import Hapi from "@hapi/hapi"
 import routes from "./routes/index.js"
 import { generateInternalServerErrorResponse } from "./handlers/index.js"
+import AuthBearer from 'hapi-auth-bearer-token'
+import { getUserFromEitherTokens } from "../services/localUserService.js"
 
 const init = async () => {
 
-	const server = _server({
+	const serverOptions = {
 		port: 3000,
 		host: "localhost",
 		routes: {
@@ -12,6 +14,36 @@ const init = async () => {
 				origin: ["*"],
 			},
 		},
+	}
+
+	if (process.env.NODE_ENV !== "production") {
+		serverOptions.debug = { request: ["error"] }
+	}
+
+	const server = Hapi.server(serverOptions)
+
+
+	await server.register(AuthBearer)
+	
+	server.auth.strategy('simple', 'bearer-access-token', {
+		validate: async (request, token, h) => {
+			try {
+				const artifacts = await getUserFromEitherTokens(token)
+				return { isValid: true, credentials: { token }, artifacts }
+			} catch (error) {}
+			return { isValid: false, credentials: {}, artifacts: {} }
+		}
+	})
+
+	server.auth.strategy('optional', 'bearer-access-token', {
+		validate: async (request, token, h) => {
+			if (!token) return { isValid: true, credentials: {}, artifacts: {} }
+			try {
+				const artifacts = await getUserFromEitherTokens(token)
+				return { isValid: true, credentials: { token }, artifacts }
+			} catch (error) {}
+			return { isValid: true, credentials: {}, artifacts: {} }
+		}
 	})
 
 	server.route(routes)

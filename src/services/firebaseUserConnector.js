@@ -2,6 +2,7 @@ import admin from 'firebase-admin'
 import { prisma } from './databaseConnector.js'
 import { UserRecord } from 'firebase-admin/auth'
 import { getPotentialUsername } from './localUserService.js'
+import { sanitizeUser } from '../utils/auth.js'
 
 admin.initializeApp()
 
@@ -25,7 +26,7 @@ export const getFirebaseUserLocalInfo = async token => {
 			}
 		})
 
-		return user
+		return sanitizeUser(user)
 	} catch (e) {
 		if (e?.code === "P2025") {
 			return await addFirebaseUserToDatabase(firebaseUserRecord)

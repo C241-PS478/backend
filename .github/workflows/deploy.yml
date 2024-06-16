@@ -14,11 +14,27 @@ jobs:
 
       - name: Set based on branch
         run: |
-          echo "IMAGE_TAG=$(if [ ${{ github.ref }} == 'refs/heads/main' ]; then echo latest; else echo latest-dev; fi)" >> $GITHUB_ENV
-          echo "RUN_SERVICE=$(if [ ${{ github.ref }} == 'refs/heads/main' ]; then echo waterwise; else echo waterwise-dev; fi)" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo latest; else echo latest-dev; fi)" >> $GITHUB_ENV
+          echo "RUN_SERVICE=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo waterwise; else echo waterwise-dev; fi)" >> $GITHUB_ENV
+          echo "NODE_ENV=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo production; else echo development; fi)" >> $GITHUB_ENV
+          echo "DATABASE_URL=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo ${{ secrets.DATABASE_URL }}; else echo ${{ secrets.DATABASE_URL_DEV }}; fi)" >> $GITHUB_ENV
+          echo "GCS_BUCKET=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo ${{ secrets.GCS_BUCKET }}; else echo ${{ secrets.GCS_BUCKET_DEV }}; fi)" >> $GITHUB_ENV
+          echo "SECRET_KEY=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo ${{ secrets.SECRET_KEY }}; else echo ${{ secrets.SECRET_KEY_DEV }}; fi)" >> $GITHUB_ENV
+          echo "GEOCODING_API_KEY=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo ${{ secrets.GEOCODING_API_KEY }}; else echo ${{ secrets.GEOCODING_API_KEY_DEV }}; fi)" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Migrate database
+        run: npm run migrate deploy
 
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
@@ -51,4 +67,10 @@ jobs:
             --region asia-east1 \
             --allow-unauthenticated \
             --port 5000 \
-            --v
+            --max-instances 3 \
+            --set-env-vars "NODE_ENV=production" \
+            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --set-env-vars "ML_API_URL=${{ secrets.ML_API_URL }}" \
+            --set-env-vars "GCS_BUCKET=${{ env.GCS_BUCKET }}" \
+            --set-env-vars "SECRET_KEY=${{ env.SECRET_KEY }}" \
+            --set-env-vars "GEOCODING_API_KEY=${{ env.GEOCODING_API_KEY }}" \

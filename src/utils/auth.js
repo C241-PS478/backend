@@ -5,3 +5,9 @@ export const getTokenFromAuthorization = (headerValue) => {
 	}
 	return token
 }
+
+export const sanitizeUser = user => {
+	if (!user) return user
+	delete user.password
+	return user
+}

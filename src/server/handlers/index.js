@@ -22,13 +22,13 @@ export const copyThisTemplateHandler = (request, h) => {
  */
 export const indexHandler = (request, h) => {
 	const response = h.response({
-		message: "WaterWise Main Backend API",
+		message: "WaterWise Main Backend Service",
 		data: {
 			date: new Date().toISOString(),
 		}
 	})
 
-	response.code(404)
+	response.code(200)
 	return response
 }
 

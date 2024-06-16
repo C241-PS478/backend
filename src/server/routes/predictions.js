@@ -9,7 +9,8 @@ export default [
 			payload: {
 				allow: 'multipart/form-data',
 				multipart: true
-			}
+			},
+			auth: 'simple'
 		}
 	},
 	{
@@ -21,6 +22,9 @@ export default [
 		method: "POST",
 		path: "/predictions",
 		handler: createPredictionHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "GET",
@@ -28,13 +32,19 @@ export default [
 		handler: getPredictionHandler,
 	},
 	{
-		method: "PUT",
+		method: "PATCH",
 		path: "/predictions/{id}",
 		handler: updatePredictionHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "DELETE",
 		path: "/predictions/{id}",
 		handler: deletePredictionHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 ]

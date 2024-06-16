@@ -1,5 +1,5 @@
 import { placeholderHandler } from "../handlers/index.js"
-import { createSourceHandler, deleteSourceHandler, getAllSourcesHandler, getSourceHandler, updateSourceHandler } from "../handlers/sources.js"
+import { addSourceCommentHandler, createSourceHandler, deleteSourceCommentHandler, deleteSourceHandler, getAllSourcesHandler, getSourceCommentHandler, getSourceCommentsHandler, getSourceHandler, getSourceLikesHandler, likeSourceHandler, unlikeSourceHandler, updateSourceCommentHandler, updateSourceHandler } from "../handlers/sources.js"
 
 export default [
 	{
@@ -10,56 +10,89 @@ export default [
 	{
 		method: "POST",
 		path: "/sources",
-		handler: getSourceHandler,
+		handler: createSourceHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "GET",
 		path: "/sources/{id}",
-		handler: createSourceHandler,
+		handler: getSourceHandler,
 	},
 	{
-		method: "PUT",
+		method: "PATCH",
 		path: "/sources/{id}",
 		handler: updateSourceHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "DELETE",
 		path: "/sources/{id}",
 		handler: deleteSourceHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "GET",
 		path: "/sources/{id}/comments",
-		handler: placeholderHandler,
+		handler: getSourceCommentsHandler,
 	},
 	{
 		method: "POST",
 		path: "/sources/{id}/comments",
-		handler: placeholderHandler,
+		handler: addSourceCommentHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "GET",
-		path: "/sources/{source_id}/comments/{comment_id}",
-		handler: placeholderHandler,
+		path: "/sources/{sourceId}/comments/{commentId}",
+		handler: getSourceCommentHandler,
 	},
 	{
-		method: "PUT",
-		path: "/sources/{source_id}/comments/{comment_id}",
-		handler: placeholderHandler,
+		method: "PATCH",
+		path: "/sources/{sourceId}/comments/{commentId}",
+		handler: updateSourceCommentHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "DELETE",
-		path: "/sources/{source_id}/comments/{comment_id}",
-		handler: placeholderHandler,
+		path: "/sources/{sourceId}/comments/{commentId}",
+		handler: deleteSourceCommentHandler,
+		options: {
+			auth: 'simple'
+		}
+	},
+	
+	{
+		method: "GET",
+		path: "/sources/{sourceId}/like",
+		handler: getSourceLikesHandler,
+		options: {
+			auth: 'optional'
+		}
 	},
 	{
 		method: "POST",
-		path: "/sources/{source_id}/like",
-		handler: placeholderHandler,
+		path: "/sources/{sourceId}/like",
+		handler: likeSourceHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 	{
 		method: "DELETE",
-		path: "/sources/{source_id}/like",
-		handler: placeholderHandler,
+		path: "/sources/{sourceId}/like",
+		handler: unlikeSourceHandler,
+		options: {
+			auth: 'simple'
+		}
 	},
 ]

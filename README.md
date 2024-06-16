@@ -1,6 +1,6 @@
-# WaterWise Main Backend API
+# WaterWise Main Backend Service
 
-This is the main backend API for the WaterWise project, built using Hapi.js (Node.js).
+This is the main backend API service for the WaterWise project, built using Hapi.js (Node.js).
 
 ## Usage
 
@@ -19,11 +19,11 @@ cp .env.example .env
 nano .env	# or use your favorite text editor
 ```
 
-The database needs to be set up. Set it up using the SQLite Prisma schema for development.
+The database needs to be set up. Set it up Prisma CLI. You should do this everytime you make changes to the schema.
 
 ```bash
-npx prisma generate --schema prisma/schema-sqlite.prisma
-npx prisma migrate dev --schema prisma/schema-sqlite.prisma
+npx prisma generate
+npx prisma migrate dev
 ```
 
 After this, you can start the server. Any changes that is made on source code will be automatically reflected in the server.

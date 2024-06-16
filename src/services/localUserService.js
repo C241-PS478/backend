@@ -1,7 +1,8 @@
 import { prisma } from './databaseConnector.js'
-import * as hasha from 'hasha'
 import * as jose from 'jose'
 import { getFirebaseUserLocalInfo } from './firebaseUserConnector.js'
+import { sanitizeUser } from '../utils/auth.js'
+import bcrypt from 'bcrypt'
 
 /**
  * @param {string} potentialUsername 
@@ -33,11 +34,8 @@ export const checkUsernameAvailability = async username => {
 	return foundUsers.length === 0
 }
 
-const generatePasswordHash = (password, salt) => {
-	if (salt) {
-		password += salt
-	}
-	return hasha.hashSync(password)
+const generatePasswordHash = async (password) => {
+	await bcrypt.hash(password, 10)
 }
 
 const jwtSecret = new TextEncoder().encode(process.env.SECRET_KEY)
@@ -61,7 +59,7 @@ const generateJwtToken = async user => {
 
 
 const getJwtPayload = async token => {
-	const { payload, protectedHeader } = await jose.jwtVerify(token, jwtSecret, {
+	const { payload } = await jose.jwtVerify(token, jwtSecret, {
 		issuer: 'urn:waterwise:auth',
 		audience: 'urn:waterwise:user'
 	})
@@ -82,7 +80,7 @@ export const registerUser = async registerDto => {
 		}
 	})
 
-	const passwordHash = generatePasswordHash(registerDto.password, newUser.id)
+	const passwordHash = generatePasswordHash(registerDto.password)
 
 	newUser = await prisma.user.update({
 		where: {
@@ -94,7 +92,7 @@ export const registerUser = async registerDto => {
 	})
 
 	return {
-		user: newUser,
+		user: sanitizeUser(newUser),
 		token: await generateJwtToken(newUser)
 	}
 }
@@ -117,7 +115,7 @@ export const loginUser = async loginDto => {
 	}
 
 	return {
-		user: user,
+		user: sanitizeUser(user),
 		token: await generateJwtToken(user)
 	}
 }
@@ -145,18 +143,23 @@ export const devLoginUser = async username => {
 	}
 
 	return {
-		user: user,
+		user: sanitizeUser(user),
 		token: await generateJwtToken(user)
 	}
 }
 
-export const getUserFromToken = async token => {
-	const payload = await getJwtPayload(token)
-	return await prisma.user.findUnique({
+export const getUser = async userId => {
+	const user = await prisma.user.findUnique({
 		where: {
-			id: payload.id
+			id: userId
 		}
 	})
+	return sanitizeUser(user)
+}
+
+export const getUserFromToken = async token => {
+	const payload = await getJwtPayload(token)
+	return getUser(payload.id)
 }
 
 export const getUserFromEitherTokens = async token => {
@@ -166,4 +169,32 @@ export const getUserFromEitherTokens = async token => {
 	try {
 		return await getFirebaseUserLocalInfo(token)
 	} catch (e) {}
+}
+
+export const updateUser = async (id, updateDto) => {
+
+
+	if (updateDto.username && !await checkUsernameAvailability(updateDto.username)) {
+		throw new Error('Username already taken')
+	}
+
+	if (updateDto.password) {
+		updateDto.password = await generatePasswordHash(updateDto.password)
+	}
+
+	const user = await prisma.user.update({
+		where: {
+			id
+		},
+		data: {
+			"username": updateDto.username,
+			"password": updateDto.password,
+			"email": updateDto.email,
+			"name": updateDto.name,
+			"isAdmin": updateDto.isAdmin,
+			"phoneNumber": updateDto.phoneNumber,
+			address: updateDto.address
+		}
+	})
+	return sanitizeUser(user)
 }

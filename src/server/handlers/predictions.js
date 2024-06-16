@@ -31,18 +31,19 @@ export const predictHandler = async (request, h) => {
 
 	const prediction = mlResponse.data.prediction
 
-	// const imageUrl = await uploadBufferToCloudStorage(image, "prediction-images/")
-	const imageUrl = "https://example.com/image.jpg"
+	const imageUrl = await uploadBufferToCloudStorage(image, "prediction-images/")
+	// const imageUrl = "https://example.com/image.jpg"
 
 	const predictionData = await prisma.waterPrediction.create({
 		data: {
-			// "author": "", // TODO
+			"authorId": request.auth.artifacts.id,
 			"imageUrl": imageUrl,
 			"prediction": prediction
 		}
 	})
 
 	const response = h.response({
+		message: "Prediction successful.",
 		data: predictionData
 	})
 
@@ -116,16 +117,18 @@ export const createPredictionHandler = async (request, h) => {
 	try {
 		prediction = await prisma.waterPrediction.create({
 			data: {
-				// "author": "", // TODO
+				"authorId": request.auth.artifacts.id,
 				"imageUrl": request.payload.imageUrl,
 				"prediction": request.payload.prediction
 			}
 		})
 	} catch (e) {
 		console.error(e)
+		throw e
 	}
 
 	const response = h.response({
+		message: "Prediction created.",
 		data: prediction
 	})
 
@@ -168,27 +171,37 @@ export const getPredictionHandler = async (request, h) => {
  */
 export const updatePredictionHandler = async (request, h) => {
 
-	let prediction
-
-	try {
-		prediction = await prisma.waterPrediction.update({
-			where: {
-				id: request.params.id
-			},
-			data: {
-				"imageUrl": request.payload.imageUrl,
-				"prediction": request.payload.prediction
-			}
-		})
-	} catch (e) {
-		if (e?.code === "P2025") {
-			const response = h.response({
-				message: "Prediction not found.",
-			})
-			response.code(404)
-			return response
+	let prediction = await prisma.waterPrediction.findUnique({
+		where: {
+			id: request.params.id
 		}
+	})
+
+	if (!prediction) {
+		const response = h.response({
+			message: "Prediction not found.",
+		})
+		response.code(404)
+		return response
 	}
+		
+	if (prediction.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
+		const response = h.response({
+			message: "You are not allowed to update this prediction.",
+		})
+		response.code(403)
+		return response
+	}
+
+	prediction = await prisma.waterPrediction.update({
+		where: {
+			id: request.params.id
+		},
+		data: {
+			"imageUrl": request.payload.imageUrl,
+			"prediction": request.payload.prediction,
+		}
+	})
 
 	const response = h.response({
 		message: "Prediction updated.",
@@ -205,23 +218,33 @@ export const updatePredictionHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const deletePredictionHandler = async (request, h) => {
-	let prediction
-
-	try {
-		prediction = await prisma.waterPrediction.delete({
-			where: {
-				id: request.params.id
-			}
-		})
-	} catch (e) {
-		if (e?.code === "P2025") {
-			const response = h.response({
-				message: "Prediction not found.",
-			})
-			response.code(404)
-			return response
+	let prediction = await prisma.waterPrediction.findUnique({
+		where: {
+			id: request.params.id
 		}
+	})
+
+	if (!prediction) {
+		const response = h.response({
+			message: "Prediction not found.",
+		})
+		response.code(404)
+		return response
 	}
+
+	if (prediction.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
+		const response = h.response({
+			message: "You are not allowed to delete this prediction.",
+		})
+		response.code(403)
+		return response
+	}
+
+	prediction = await prisma.waterPrediction.delete({
+		where: {
+			id: request.params.id
+		}
+	})
 
 	const response = h.response({
 		message: "Prediction deleted."

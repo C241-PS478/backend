@@ -17,13 +17,17 @@ export const getAllSourcesHandler = async (request, h) => {
 
 	// TODO add query on radius
 
-	const predictions = await prisma.waterPrediction.findMany({
+	const source = await prisma.waterSource.findMany({
 		skip: (request.query.page || 0) * 10,
 		take: 10,
+		include: {
+			address: true,
+			author: true,
+		},
 	})
 
 	const response = h.response({
-		data: predictions
+		data: source
 	})
 
 	response.code(200)
@@ -36,13 +40,17 @@ export const getAllSourcesHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const getSourceHandler = async (request, h) => {
-	const prediction = await prisma.waterSource.findUnique({
+	const source = await prisma.waterSource.findUnique({
 		where: {
 			id: request.params.id
-		}
+		},
+		include: {
+			address: true,
+			author: true,
+		},
 	})
 
-	if (!prediction) {
+	if (!source) {
 		const response = h.response({
 			message: "Source not found.",
 		})
@@ -51,7 +59,7 @@ export const getSourceHandler = async (request, h) => {
 	}
 
 	const response = h.response({
-		data: prediction
+		data: source
 	})
 
 	response.code(200)
@@ -65,25 +73,49 @@ export const getSourceHandler = async (request, h) => {
  */
 export const createSourceHandler = async (request, h) => {
 
-	const reverseGeocodeResult = getReverseGeocode(request.payload.lat, request.payload.lon)
+	const reverseGeocodeResult = await getReverseGeocode(request.payload.lat, request.payload.long)
+
+	let addressCreate = {
+		create: {
+			longitude: Number(request.payload.long),
+			latitude: Number(request.payload.lat)
+		}
+	}
+
+	for (const result of reverseGeocodeResult.results) {
+		try {
+			result.address_components.find
+			console.log(result.address_components)
+			addressCreate.create.country = result.address_components.find((component) => component.types.includes("country")).long_name
+			console.log(addressCreate.create.country)
+			addressCreate.create.province = result.address_components.find((component) => component.types.includes("administrative_area_level_1")).long_name
+			console.log(addressCreate.create.province)
+			addressCreate.create.city = result.address_components.find((component) => component.types.includes("administrative_area_level_2")).long_name
+			console.log(addressCreate.create.city)
+			addressCreate.create.district = result.address_components.find((component) => component.types.includes("administrative_area_level_3")).long_name
+			console.log(addressCreate.create.district)
+			addressCreate.create.village = result.address_components.find((component) => component.types.includes("administrative_area_level_4")).long_name
+			console.log(addressCreate.create.village)
+			addressCreate.create.address = result.formatted_address
+			break
+		} catch (e) {}
+	}
 
 	const source = await prisma.waterSource.create({
 		data: {
-			"address": {
-				create: {
-					"latitude": request.payload.lat,
-					"longitude": request.payload.lon,
-					"country": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "country").long_name,
-					"province": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_1").long_name,
-					"city": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_2").long_name,
-					"district": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_3").long_name,
-					"village": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_4").long_name,
-					"address": reverseGeocodeResult.results[0].formatted_address
+			address: addressCreate,
+			state: request.payload.state,
+			description: request.payload.description,
+			author: {
+				connect: {
+					id: request.auth.artifacts.id
 				}
-			},
-			"state": request.payload.state,
-			"description": request.payload.description,
-		}
+			} 
+		},
+		include: {
+			address: true,
+			author: true,
+		},
 	})
 
 	const response = h.response({
@@ -101,46 +133,79 @@ export const createSourceHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const updateSourceHandler = async (request, h) => {
-
-	let prediction
-
-	const reverseGeocodeResult = getReverseGeocode(request.payload.lat, request.payload.lon)
-
-	try {
-		prediction = await prisma.waterSource.update({
-			where: {
-				id: request.params.id
-			},
-			data: {
-				"address": {
-					update: {
-						"latitude": request.payload.lat,
-						"longitude": request.payload.lon,
-						"country": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "country").long_name,
-						"province": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_1").long_name,
-						"city": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_2").long_name,
-						"district": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_3").long_name,
-						"village": reverseGeocodeResult.results[0].address_components.find((component) => component.types === "administrative_area_level_4").long_name,
-						"address": reverseGeocodeResult.results[0].formatted_address
-					}
-				},
-				"state": request.payload.state,
-				"description": request.payload.description,
-			}
-		})
-	} catch (e) {
-		if (e?.code === "P2025") {
-			const response = h.response({
-				message: "Source not found.",
-			})
-			response.code(404)
-			return response
+	let source = await prisma.waterSource.findUnique({
+		where: {
+			id: request.params.id
 		}
+	})
+
+	if (!source) {
+		const response = h.response({
+			message: "Source not found.",
+		})
+		response.code(404)
+		return response
 	}
+
+	if (source.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
+		const response = h.response({
+			message: "You are not allowed to update this source.",
+		})
+		response.code(401)
+		return response
+	}
+
+	let addressCreate
+
+	if (request.payload.lat && request.payload.lon && request.payload.lat !== source.address.latitude && request.payload.lon !== source.address.longitude) {
+		const reverseGeocodeResult = getReverseGeocode(request.payload.lat, request.payload.lon)
+
+		addressCreate = {
+			create: {
+				longitude: Number(request.payload.long),
+				latitude: Number(request.payload.lat)
+			}
+		}
+	
+		for (const result of reverseGeocodeResult.results) {
+			try {
+				result.address_components.find
+				console.log(result.address_components)
+				addressCreate.create.country = result.address_components.find((component) => component.types.includes("country")).long_name
+				console.log(addressCreate.create.country)
+				addressCreate.create.province = result.address_components.find((component) => component.types.includes("administrative_area_level_1")).long_name
+				console.log(addressCreate.create.province)
+				addressCreate.create.city = result.address_components.find((component) => component.types.includes("administrative_area_level_2")).long_name
+				console.log(addressCreate.create.city)
+				addressCreate.create.district = result.address_components.find((component) => component.types.includes("administrative_area_level_3")).long_name
+				console.log(addressCreate.create.district)
+				addressCreate.create.village = result.address_components.find((component) => component.types.includes("administrative_area_level_4")).long_name
+				console.log(addressCreate.create.village)
+				addressCreate.create.address = result.formatted_address
+				break
+			} catch (e) {}
+		}
+		}
+
+	source = await prisma.waterSource.update({
+		where: {
+			id: request.params.id
+		},
+		data: {
+			address: addressCreate,
+			state: request.payload.state,
+			description: request.payload.description,
+			dateModified: new Date().toISOString(),
+		},
+		include: {
+			address: true,
+			author: true,
+		},
+	})
 
 	const response = h.response({
 		message: "Source updated.",
-		data: prediction
+		data: source
 	})
 
 	response.code(200)
@@ -153,10 +218,9 @@ export const updateSourceHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const deleteSourceHandler = async (request, h) => {
-	let prediction
-
+	let source
 	try {
-		prediction = await prisma.waterSource.delete({
+		source = await prisma.waterSource.findUnique({
 			where: {
 				id: request.params.id
 			}
@@ -171,8 +235,337 @@ export const deleteSourceHandler = async (request, h) => {
 		}
 	}
 
+	if (source.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
+		const response = h.response({
+			message: "You are not allowed to delete this source.",
+		})
+		response.code(403)
+		return response
+	}
+
+	source = await prisma.waterSource.delete({
+		where: {
+			id: request.params.id
+		}
+	})
+
 	const response = h.response({
 		message: "Source deleted."
+	})
+
+	response.code(204)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const getSourceCommentsHandler = async (request, h) => {
+	if (request.query?.page && isNaN(request.query.page))
+		return generateWrongParameterResponse(h, "page")
+
+	const comments = await prisma.waterSourceComment.findMany({
+		where: {
+			waterSourceId: request.params.id
+		},
+		skip: (request.query.page || 0) * 10,
+		take: 10,
+		include: {
+			author: true
+		}
+	})
+
+	const response = h.response({
+		data: comments
+	})
+
+	response.code(200)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const addSourceCommentHandler = async (request, h) => {
+	let comment
+
+	try {
+		comment = await prisma.waterSourceComment.create({
+			data: {
+				waterSource: {
+					connect: {
+						id: request.params.id
+					}
+				},
+				author: {
+					connect: {
+						id: request.auth.artifacts.id
+					}
+				},
+				content: request.payload.content,
+			},
+			include: {
+				author: true
+			}
+		})
+	} catch (e) {
+		if (e?.code === "P2003") {
+			const response = h.response({
+				message: "Source not found.",
+			})
+			response.code(404)
+			return response
+		}
+	}
+
+	const response = h.response({
+		data: comment
+	})
+
+	response.code(201)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const getSourceCommentHandler = async (request, h) => {
+	const comment = await prisma.waterSourceComment.findUnique({
+		where: {
+			id: request.params.commentId,
+			waterSourceId: request.params.sourceId,
+		},
+		include: {
+			author: true
+		}
+	})
+
+	if (!comment) {
+		const response = h.response({
+			message: "Comment not found.",
+		})
+		response.code(404)
+		return response
+	}
+
+	const response = h.response({
+		data: comment
+	})
+
+	response.code(200)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const updateSourceCommentHandler = async (request, h) => {
+	let comment
+	try {
+		comment = await prisma.waterSourceComment.update({
+			where: {
+				id: request.params.commentId
+			},
+			data: {
+				content: request.payload.content,
+				dateModified: new Date().toISOString()
+			}
+		})
+	} catch (e) {
+		if (e?.code === "P2015") {
+			const response = h.response({
+				message: "Source or comment not found.",
+			})
+			response.code(404)
+			return response
+		}
+	}
+
+	const response = h.response({
+		message: "Comment updated.",
+		data: comment
+	})
+
+	response.code(200)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const deleteSourceCommentHandler = async (request, h) => {
+	try {
+		await prisma.waterSourceComment.delete({
+			where: {
+				id: request.params.commentId
+			}
+		})
+	} catch (e) {
+		if (e?.code === "P2015") {
+			const response = h.response({
+				message: "Source or comment not found.",
+			})
+			response.code(404)
+			return response
+		}
+	}
+
+	const response = h.response({
+		message: "Comment deleted."
+	})
+
+	response.code(204)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const getSourceLikesHandler = async (request, h) => {
+	const source = await prisma.waterSource.findUnique({
+		where: {
+			id: request.params.sourceId
+		}
+	})
+
+	if (!source) {
+		const response = h.response({
+			message: "Source not found.",
+		})
+		response.code(404)
+		return response
+	}
+
+	const likesAggregate = await prisma.waterSourcesLike.aggregate({
+		where: {
+			waterSourceId: request.params.sourceId
+		},
+		_count: {
+			userId: true
+		}
+	})
+
+	let isUserLiked
+	if (request.auth?.artifacts?.id) {
+		const userLike = await prisma.waterSourcesLike.findUnique({
+			where: {
+				waterSourceId_userId: {
+					waterSourceId: request.params.sourceId,
+					userId: request.auth.artifacts.id
+				}
+			}
+		})
+		isUserLiked = !!userLike
+	}
+
+	const response = h.response({
+		data: {
+			isUserLiked: isUserLiked,
+			numLikes: likesAggregate._count.userId
+		}
+	})
+
+	response.code(200)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const likeSourceHandler = async (request, h) => {
+	let like = await prisma.waterSourcesLike.findUnique({
+		where: {
+			waterSourceId_userId: {
+				waterSourceId: request.params.sourceId,
+				userId: request.auth.artifacts.id
+			}
+		}
+	})
+
+	console.log(like)
+
+	if (like) {
+		const response = h.response({
+			message: "Source already liked.",
+		})
+		response.code(201)
+		return response
+	}
+
+	try {
+		like = await prisma.waterSourcesLike.create({
+			data: {
+				waterSource: {
+					connect: {
+						id: request.params.sourceId
+					}
+				},
+				user: {
+					connect: {
+						id: request.auth.artifacts.id
+					}
+				}
+			}
+		})
+	} catch (e) {
+		if (e?.code === "P2003") {
+			const response = h.response({
+				message: "Source not found.",
+			})
+			response.code(404)
+			return response
+		}
+	}
+
+	const response = h.response({
+		"message": "Source liked."
+	})
+
+	response.code(201)
+	return response
+}
+
+/**
+ * @param {hapi.Request<ReqRefDefaults>} request 
+ * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
+ * @returns {hapi.ResponseObject}
+ */
+export const unlikeSourceHandler = async (request, h) => {
+	try {
+		await prisma.waterSourcesLike.delete({
+			where: {
+				waterSourceId_userId: {
+					waterSourceId: request.params.id,
+					userId: request.auth.artifacts.id
+				}
+			}
+		})
+	} catch (e) {
+		if (e?.code === "P2003") {
+			const response = h.response({
+				message: "Source not found.",
+			})
+			response.code(404)
+			return response
+		}
+	}
+
+	const response = h.response({
+		"message": "Source unliked."
 	})
 
 	response.code(204)
