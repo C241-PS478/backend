@@ -1,4 +1,5 @@
 {
+  "name": "@c241-ps478/backend",
   "private": true,
   "type": "module",
   "scripts": {
