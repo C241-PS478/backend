@@ -8,7 +8,6 @@ const init = async () => {
 
 	const serverOptions = {
 		port: 3000,
-		host: "localhost",
 		routes: {
 			cors: {
 				origin: ["*"],
