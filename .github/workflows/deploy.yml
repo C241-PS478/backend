@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - dev
+      - prod
 
 jobs:
   deploy:
@@ -12,7 +12,7 @@ jobs:
 
     steps:
 
-      - name: Set based on branch
+      - name: Set variables based on branch
         run: |
           echo "IMAGE_TAG=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo latest; else echo latest-dev; fi)" >> $GITHUB_ENV
           echo "RUN_SERVICE=$(if [ ${{ github.ref }} == 'refs/heads/prod' ]; then echo waterwise; else echo waterwise-dev; fi)" >> $GITHUB_ENV
@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -59,7 +59,7 @@ jobs:
           gcloud auth configure-docker asia-east1-docker.pkg.dev
           docker push asia-east1-docker.pkg.dev/c241-ps478/waterwise/main-backend:${{ env.IMAGE_TAG }}
 
-      - name: Deploy to Google Run
+      - name: Deploy to Google Cloud Run
         run: |
           gcloud run deploy ${{ env.RUN_SERVICE }} \
             --image asia-east1-docker.pkg.dev/c241-ps478/waterwise/main-backend:${{ env.IMAGE_TAG }} \

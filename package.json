@@ -7,6 +7,7 @@
     "start": "nodemon ./src/server/server.js",
     "generate": "prisma generate",
     "generate:sqlite": "prisma generate --schema prisma/schema-sqlite.prisma",
+    "migrate": "prisma migrate deploy",
     "migrate-dev": "prisma migrate dev",
     "migrate-dev:sqlite": "prisma migrate dev --schema prisma/schema-sqlite.prisma"
   },
