@@ -73,4 +73,4 @@ jobs:
             --set-env-vars "ML_API_URL=${{ secrets.ML_API_URL }}" \
             --set-env-vars "GCS_BUCKET=${{ env.GCS_BUCKET }}" \
             --set-env-vars "SECRET_KEY=${{ env.SECRET_KEY }}" \
-            --set-env-vars "GEOCODING_API_KEY=${{ env.GEOCODING_API_KEY }}" \
+            --set-env-vars "GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }}" \
