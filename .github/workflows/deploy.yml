@@ -76,7 +76,7 @@ jobs:
             --port 3000 \
             --max-instances 3 \
             --set-env-vars "NODE_ENV=${{ env.NODE_ENV }}" \
-            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --set-env-vars "DATABASE_URL=${{ env.DATABASE_URL }}" \
             --set-env-vars "ML_API_URL=${{ secrets.ML_API_URL }}" \
             --set-env-vars "GCS_BUCKET=${{ env.GCS_BUCKET }}" \
             --set-env-vars "SECRET_KEY=${{ env.SECRET_KEY }}" \
