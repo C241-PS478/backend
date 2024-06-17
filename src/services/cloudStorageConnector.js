@@ -1,40 +1,13 @@
 import { Storage } from '@google-cloud/storage'
-import { fileTypeFromBuffer } from 'file-type'
 
 const storage = new Storage()
 
-/**
- * @returns {string}
- */
-function generateFileName() {
-	const timestamp = Date.now()
-	return `${timestamp}`
-}
+const bucketName = process.env.GCS_BUCKET
 
-/**
- * @param {Buffer} buffer 
- * @returns {string}
- */
-const getFileType = buffer => {
-	const type = fileTypeFromBuffer(buffer)
-	return type ? type.ext : 'unknown'
-}
+export const uploadBufferToCloudStorage = async (buffer, filePath) => {
+	await storage.bucket(bucketName).file(filePath).save(buffer)
 
-const bucketName = 'waterwise'
-
-export const uploadBufferToCloudStorage = async (buffer, pathPrefix) => {
-	const fileName = generateFileName()
-	const fileType = getFileType(buffer)
-
-	const destinationFilePath = `${pathPrefix}${fileName}.${fileType}`
-
-	console.log(fileType)
-	
-	return "https://example.com/image.jpg"
-
-	await storage.bucket(bucketName).file(destinationFilePath).save(buffer)
-
-	return `https://storage.googleapis.com/${bucketName}/${destinationFilePath}`
+	return `https://storage.googleapis.com/${bucketName}/${filePath}`
 }
 
 export const deleteFileFromCloudStorage = async url => {

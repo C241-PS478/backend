@@ -6,6 +6,11 @@ export const getTokenFromAuthorization = (headerValue) => {
 	return token
 }
 
+/**
+ * 
+ * @param {import("@prisma/client").User} user 
+ * @returns import("@prisma/client").User
+ */
 export const sanitizeUser = user => {
 	if (!user) return user
 	delete user.password

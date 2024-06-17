@@ -8,7 +8,11 @@ export default [
 	{
 		method: "GET",
 		path: "/",
-		handler: indexHandler
+		handler: indexHandler,
+		options: {
+			tags: ['api', 'index'],
+			description: "Index",
+		}
 	},
 	...auth,
 	...test,

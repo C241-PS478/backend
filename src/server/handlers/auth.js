@@ -8,12 +8,12 @@ import { getTokenFromAuthorization } from "../../utils/auth.js"
  * @returns {hapi.ResponseObject}
  */
 export const loginHandler = async (request, h) => {
-	let user, token
+	let data
 	try {
-		({ user, token } = loginUser({
+		data = await loginUser({
 			username: request.payload.username,
 			password: request.payload.password
-		}))
+		})
 	} catch (e) {
 		if (e.message === "User not found" || e.message === "Invalid password") {
 			const response = h.response({
@@ -27,10 +27,7 @@ export const loginHandler = async (request, h) => {
 
 	const response = h.response({
 		message: "Login successful!",
-		data: {
-			user,
-			token
-		}
+		data
 	})
 
 	response.code(200)
@@ -43,16 +40,16 @@ export const loginHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const registerHandler = async (request, h) => {
-	let user, token
+	let data
 	try {
-		({ user, token } = await registerUser({
+		data = await registerUser({
 			email: request.payload.email,
 			username: request.payload.username,
 			name: request.payload.name,
 			password: request.payload.password
-		}))
+		})
 	} catch (e) {
-		if (e.code === "P2002") {
+		if (e.message === "Username already taken") {
 			const response = h.response({
 				message: "Username already taken.",
 			})
@@ -64,10 +61,7 @@ export const registerHandler = async (request, h) => {
 
 	const response = h.response({
 		message: "Registration successful.",
-		data: {
-			user,
-			token
-		}
+		data
 	})
 
 	response.code(200)
@@ -228,7 +222,7 @@ export const updateUserHandler = async (request, h) => {
 		response.code(403)
 		return response
 	}
-	
+
 	if (!request.auth.artifacts.isAdmin) {
 		delete request.payload.isAdmin
 	}

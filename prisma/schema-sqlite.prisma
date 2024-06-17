@@ -50,12 +50,13 @@ model Address {
 // Deteksi Kejernihan Air
 
 model WaterPrediction {
-  id          String   @id @default(uuid())
-  author      User?    @relation(fields: [authorId], references: [id])
+  id          String        @id @default(uuid())
+  author      User?         @relation(fields: [authorId], references: [id])
   authorId    String?
   imageUrl    String
   prediction  Float
-  dateCreated DateTime @default(now())
+  dateCreated DateTime      @default(now())
+  waterSource WaterSource[]
 }
 
 // Geolocation of Water Sources and Quantities
@@ -68,8 +69,9 @@ model WaterSource {
   dateModified        DateTime?
   address             Address              @relation(fields: [addressId], references: [id])
   description         String               @default("")
-  state               String
   addressId           String
+  waterPrediction     WaterPrediction      @relation(fields: [waterPredictionId], references: [id])
+  waterPredictionId   String
   waterSourceLikes    WaterSourcesLike[]
   waterSourceComments WaterSourceComment[]
 }

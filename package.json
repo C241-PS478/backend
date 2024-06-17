@@ -1,5 +1,6 @@
 {
   "name": "@c241-ps478/backend",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,12 +17,15 @@
     "@google-cloud/storage": "^7.11.2",
     "@googlemaps/google-maps-services-js": "^3.4.0",
     "@hapi/hapi": "^21.3.9",
+    "@hapi/inert": "^7.1.0",
+    "@hapi/vision": "^7.0.3",
     "@prisma/client": "^5.15.0",
     "bcrypt": "^5.1.1",
     "core-js": "^3.37.1",
-    "file-type": "^19.0.0",
     "firebase-admin": "^12.1.1",
     "hapi-auth-bearer-token": "^8.0.0",
+    "hapi-swagger": "^17.2.1",
+    "joi": "^17.13.1",
     "jose": "^5.4.0",
     "prisma": "^5.15.0",
     "slugify": "^1.6.6"

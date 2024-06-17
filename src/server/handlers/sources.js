@@ -85,17 +85,11 @@ export const createSourceHandler = async (request, h) => {
 	for (const result of reverseGeocodeResult.results) {
 		try {
 			result.address_components.find
-			console.log(result.address_components)
 			addressCreate.create.country = result.address_components.find((component) => component.types.includes("country")).long_name
-			console.log(addressCreate.create.country)
 			addressCreate.create.province = result.address_components.find((component) => component.types.includes("administrative_area_level_1")).long_name
-			console.log(addressCreate.create.province)
 			addressCreate.create.city = result.address_components.find((component) => component.types.includes("administrative_area_level_2")).long_name
-			console.log(addressCreate.create.city)
 			addressCreate.create.district = result.address_components.find((component) => component.types.includes("administrative_area_level_3")).long_name
-			console.log(addressCreate.create.district)
 			addressCreate.create.village = result.address_components.find((component) => component.types.includes("administrative_area_level_4")).long_name
-			console.log(addressCreate.create.village)
 			addressCreate.create.address = result.formatted_address
 			break
 		} catch (e) {}
@@ -104,17 +98,22 @@ export const createSourceHandler = async (request, h) => {
 	const source = await prisma.waterSource.create({
 		data: {
 			address: addressCreate,
-			state: request.payload.state,
 			description: request.payload.description,
 			author: {
 				connect: {
 					id: request.auth.artifacts.id
 				}
-			} 
+			},
+			prediction: {
+				connect: {
+					id: request.payload.predictionId
+				}
+			}
 		},
 		include: {
 			address: true,
 			author: true,
+			prediction: true,
 		},
 	})
 
@@ -170,17 +169,11 @@ export const updateSourceHandler = async (request, h) => {
 		for (const result of reverseGeocodeResult.results) {
 			try {
 				result.address_components.find
-				console.log(result.address_components)
 				addressCreate.create.country = result.address_components.find((component) => component.types.includes("country")).long_name
-				console.log(addressCreate.create.country)
 				addressCreate.create.province = result.address_components.find((component) => component.types.includes("administrative_area_level_1")).long_name
-				console.log(addressCreate.create.province)
 				addressCreate.create.city = result.address_components.find((component) => component.types.includes("administrative_area_level_2")).long_name
-				console.log(addressCreate.create.city)
 				addressCreate.create.district = result.address_components.find((component) => component.types.includes("administrative_area_level_3")).long_name
-				console.log(addressCreate.create.district)
 				addressCreate.create.village = result.address_components.find((component) => component.types.includes("administrative_area_level_4")).long_name
-				console.log(addressCreate.create.village)
 				addressCreate.create.address = result.formatted_address
 				break
 			} catch (e) {}
@@ -193,7 +186,6 @@ export const updateSourceHandler = async (request, h) => {
 		},
 		data: {
 			address: addressCreate,
-			state: request.payload.state,
 			description: request.payload.description,
 			dateModified: new Date().toISOString(),
 		},
@@ -495,8 +487,6 @@ export const likeSourceHandler = async (request, h) => {
 			}
 		}
 	})
-
-	console.log(like)
 
 	if (like) {
 		const response = h.response({

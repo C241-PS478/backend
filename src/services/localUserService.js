@@ -68,7 +68,7 @@ const getJwtPayload = async token => {
 
 export const registerUser = async registerDto => {
 
-	if (checkUsernameAvailability(registerDto.username)) {
+	if (!checkUsernameAvailability(registerDto.username)) {
 		throw new Error('Username already taken')
 	}
 
@@ -76,18 +76,8 @@ export const registerUser = async registerDto => {
 		data: {
 			email: registerDto.email,
 			username: registerDto.username,
-			name: registerDto.name
-		}
-	})
-
-	const passwordHash = generatePasswordHash(registerDto.password)
-
-	newUser = await prisma.user.update({
-		where: {
-			id: newUser.id
-		},
-		data: {
-			password: passwordHash
+			name: registerDto.name,
+			password: await bcrypt.hash(registerDto.password, 10)
 		}
 	})
 
@@ -108,9 +98,7 @@ export const loginUser = async loginDto => {
 		throw new Error('User not found')
 	}
 
-	const passwordHash = generatePasswordHash(loginDto.password, user.id)
-
-	if (user.password !== passwordHash) {
+	if (!await bcrypt.compare(loginDto.password, user.password)) {
 		throw new Error('Invalid password')
 	}
 
@@ -159,12 +147,13 @@ export const getUser = async userId => {
 
 export const getUserFromToken = async token => {
 	const payload = await getJwtPayload(token)
-	return getUser(payload.id)
+	return await getUser(payload.id)
 }
 
 export const getUserFromEitherTokens = async token => {
 	try {
-		return await getUserFromToken(token)
+		const user = await getUserFromToken(token)
+		if (user) return user
 	} catch (e) {}
 	try {
 		return await getFirebaseUserLocalInfo(token)

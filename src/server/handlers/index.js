@@ -1,3 +1,7 @@
+import fs from 'fs'
+
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
@@ -25,6 +29,7 @@ export const indexHandler = (request, h) => {
 		message: "WaterWise Main Backend Service",
 		data: {
 			date: new Date().toISOString(),
+			version: packageJson.version
 		}
 	})
 

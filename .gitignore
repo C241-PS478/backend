@@ -132,3 +132,6 @@ dist
 # Prisma
 /**/*.db
 /**/*.db-journal
+
+# Secrets
+service-account-key.json

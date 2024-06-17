@@ -10,6 +10,7 @@ import { uploadBufferToCloudStorage } from "../../services/cloudStorageConnector
  * @returns {hapi.ResponseObject}
  */
 export const predictHandler = async (request, h) => {
+	
 	const image = request.payload.image
 
 	if (!image) {
@@ -20,25 +21,34 @@ export const predictHandler = async (request, h) => {
 		return response
 	}
 
+	let filename = image.hapi.filename
+	filename = `${Date.now()}${filename.substring(filename.lastIndexOf("."))}`
+
 	// TODO move this to services folder
 	let formData = new FormData()
-	formData.append('image', new Blob([image]))
+	// formData.append('image', image, filename)
+	formData.append('image', new Blob([image._data], { type: image.hapi.headers['content-type'] }), filename)
 
-	const mlResponse = await fetch(`${process.env.ML_API_URL}/clean-water`, {
+	const mlResponseRaw = await fetch(`${process.env.ML_API_URL}/clean-water`, {
 		method: "POST",
 		body: formData
-	}).then(res => res.json())
+	})
+
+	const mlResponse = await mlResponseRaw.json()
 
 	const prediction = mlResponse.data.prediction
 
-	const imageUrl = await uploadBufferToCloudStorage(image, "prediction-images/")
-	// const imageUrl = "https://example.com/image.jpg"
+	const imageUrl = await uploadBufferToCloudStorage(image, `prediction-images/${filename}`, )
 
 	const predictionData = await prisma.waterPrediction.create({
 		data: {
-			"authorId": request.auth.artifacts.id,
-			"imageUrl": imageUrl,
-			"prediction": prediction
+			author: {
+				connect: {
+					id: request.auth.artifacts.id
+				}
+			},
+			imageUrl: imageUrl,
+			prediction: prediction
 		}
 	})
 
@@ -119,7 +129,7 @@ export const createPredictionHandler = async (request, h) => {
 			data: {
 				"authorId": request.auth.artifacts.id,
 				"imageUrl": request.payload.imageUrl,
-				"prediction": request.payload.prediction
+				"prediction": request.payload.prediction,
 			}
 		})
 	} catch (e) {
@@ -245,6 +255,8 @@ export const deletePredictionHandler = async (request, h) => {
 			id: request.params.id
 		}
 	})
+
+	await deleteImageFromCloudStorage(prediction.imageUrl)
 
 	const response = h.response({
 		message: "Prediction deleted."

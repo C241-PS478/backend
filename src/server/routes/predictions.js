@@ -8,35 +8,46 @@ export default [
 		options: {
 			payload: {
 				allow: 'multipart/form-data',
-				multipart: true
+				multipart: true,
+				output: 'stream',
+				parse: true
 			},
-			auth: 'simple'
+			auth: 'simple',
+			tags: ['api', 'predictions']
 		}
 	},
 	{
 		method: "GET",
 		path: "/predictions",
 		handler: getAllPredictionsHandler,
+		options: {
+			tags: ['api', 'predictions']
+		},
 	},
 	{
 		method: "POST",
 		path: "/predictions",
 		handler: createPredictionHandler,
 		options: {
-			auth: 'simple'
+			auth: 'simple',
+			tags: ['api', 'predictions']
 		}
 	},
 	{
 		method: "GET",
 		path: "/predictions/{id}",
 		handler: getPredictionHandler,
+		options: {
+			tags: ['api', 'predictions']
+		},
 	},
 	{
 		method: "PATCH",
 		path: "/predictions/{id}",
 		handler: updatePredictionHandler,
 		options: {
-			auth: 'simple'
+			auth: 'simple',
+			tags: ['api', 'predictions']
 		}
 	},
 	{
@@ -44,7 +55,8 @@ export default [
 		path: "/predictions/{id}",
 		handler: deletePredictionHandler,
 		options: {
-			auth: 'simple'
+			auth: 'simple',
+			tags: ['api', 'predictions']
 		}
 	},
 ]
