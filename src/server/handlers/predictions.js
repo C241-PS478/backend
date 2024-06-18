@@ -29,7 +29,7 @@ export const predictHandler = async (request, h) => {
 	// formData.append('image', image, filename)
 	formData.append('image', new Blob([image._data], { type: image.hapi.headers['content-type'] }), filename)
 
-	const mlResponseRaw = await fetch(`${process.env.ML_API_URL}/clean-water`, {
+	const mlResponseRaw = await fetch(`${process.env.ML_API_URL}/clean-water/with-extraction`, {
 		method: "POST",
 		body: formData
 	})
