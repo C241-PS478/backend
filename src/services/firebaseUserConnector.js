@@ -18,20 +18,17 @@ export const getFirebaseUserRecord = async token => {
 
 export const getFirebaseUserLocalInfo = async token => {
 	const firebaseUserRecord = await getFirebaseUserRecord(token)
-
-	try {
-		const user = await prisma.user.findUnique({
-			where: {
-				uid: firebaseUserRecord.uid
-			}
-		})
-
-		return sanitizeUser(user)
-	} catch (e) {
-		if (e?.code === "P2025") {
-			return await addFirebaseUserToDatabase(firebaseUserRecord)
+	console.log("firebaseUserRecord", firebaseUserRecord)
+	const user = await prisma.user.findFirst({
+		where: {
+			firebaseId: firebaseUserRecord.uid
 		}
-		throw e
+	})
+
+	if (user) {
+		return sanitizeUser(user)
+	} else {
+		return await addFirebaseUserToDatabase(firebaseUserRecord)
 	}
 }
 
@@ -39,12 +36,22 @@ export const getFirebaseUserLocalInfo = async token => {
  * @param {UserRecord} firebaseUserRecord 
  */
 export const addFirebaseUserToDatabase = async firebaseUserRecord => {
-	let potentialUsername = await getPotentialUsername(firebaseUserRecord.email.split('@')[0])
+
+	let email
+	
+	const googleProviderData = firebaseUserRecord.providerData.find(provider => provider.providerId === 'google.com')
+	if (googleProviderData) {
+		email = googleProviderData.email
+	} else {
+		email = firebaseUserRecord.providerData[0].email
+	}
+
+	let potentialUsername = await getPotentialUsername(email.split('@')[0])
 	
 	const newUser = await prisma.user.create({
 		data: {
 			firebaseId: firebaseUserRecord.uid,
-			email: firebaseUserRecord.email,
+			email: email,
 			name: firebaseUserRecord.displayName,
 			username: potentialUsername,
 		}
