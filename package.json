@@ -1,6 +1,6 @@
 {
   "name": "@c241-ps478/backend",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "type": "module",
   "scripts": {

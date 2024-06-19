@@ -1,5 +1,5 @@
 import { getFirebaseUserLocalInfo } from "../../services/firebaseUserConnector.js"
-import { devLoginUser, getUser, getUserFromEitherTokens, loginUser, registerUser, updateUser } from "../../services/localUserService.js"
+import { devLoginUser, getUser, getUserFromEitherTokens, loginFirebaseUser, loginUser, registerUser, updateUser } from "../../services/localUserService.js"
 import { getTokenFromAuthorization } from "../../utils/auth.js"
 
 /**
@@ -94,9 +94,8 @@ export const devLoginHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const loginGoogleHandler = async (request, h) => {
-	const token = request.auth.credentials.token
-	const user = await getFirebaseUserLocalInfo(token)
-
+	const { user, token } = await loginFirebaseUser(request.auth.credentials.token)
+	
 	const response = h.response({
 		message: "Login successful.",
 		data: {
