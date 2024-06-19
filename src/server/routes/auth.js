@@ -45,10 +45,10 @@ const routes = [
 					200: Joi.object({
 						message: Joi.string().required().example("Registration successful."),
 						data: joiAuthenticationData
-					}).required(),
+					}).required().unknown(true),
 					400: Joi.object({
 						message: Joi.string().required().example("Username already taken.")
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -61,15 +61,21 @@ const routes = [
 			tags: ['api', 'auth'],
 			description: "Login",
 			notes: "Login with username and password.",
+			validate: {
+				payload: Joi.object({
+					username: Joi.string().required().description("Username"),
+					password: Joi.string().required().description("Password"),
+				})
+			},
 			response: {
 				status: {
 					200: Joi.object({
 						message: Joi.string().required().example("Login successful."),
 						data: joiAuthenticationData
-					}).required(),
+					}).required().unknown(true),
 					400: Joi.object({
 						message: Joi.string().required().example("Invalid username or password.")
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -91,10 +97,10 @@ const routes = [
 					200: Joi.object({
 						message: Joi.string().required().example("Login successful."),
 						data: joiAuthenticationData
-					}).required(),
+					}).required().unknown(true),
 					400: Joi.object({
 						message: Joi.string().required()
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -115,7 +121,7 @@ const routes = [
 				status: {
 					200: Joi.object({
 						data: joiUserData
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -144,10 +150,10 @@ const routes = [
 					200: Joi.object({
 						message: Joi.string().required().example("User updated."),
 						data: joiUserData
-					}).required(),
+					}).required().unknown(true),
 					400: Joi.object({
 						message: Joi.string().required()
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -171,13 +177,13 @@ const routes = [
 				status: {
 					200: Joi.object({
 						data: joiUserData
-					}).required(),
+					}).required().unknown(true),
 					403: Joi.object({
 						message: Joi.string().required().example("You are not allowed to view this user.")
-					}).required(),
+					}).required().unknown(true),
 					404: Joi.object({
 						message: Joi.string().required().example("User not found.")
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -197,11 +203,11 @@ const routes = [
 					id: Joi.string().required().example("336fa0a8-1d24-4241-805e-2dc50d6250f5").description("User ID")
 				}),
 				payload: Joi.object({
-					username: Joi.string().required(),
-					password: Joi.string().required(),
-					name: Joi.string().required(),
-					email: Joi.string().email().required(),
-					phoneNumber: Joi.string().allow("").required(),
+					username: Joi.string(),
+					password: Joi.string(),
+					name: Joi.string(),
+					email: Joi.string().email(),
+					phoneNumber: Joi.string().allow(""),
 				})
 			},
 			response: {
@@ -209,13 +215,13 @@ const routes = [
 					200: Joi.object({
 						message: Joi.string().required().example("User updated."),
 						data: joiUserData
-					}).required(),
+					}).required().unknown(true),
 					403: Joi.object({
 						message: Joi.string().required().example("You are not allowed to update this user.")
-					}).required(),
+					}).required().unknown(true),
 					404: Joi.object({
 						message: Joi.string().required().example("User not found.")
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},
@@ -236,7 +242,7 @@ if (process.env.NODE_ENV === "development") {
 					200: Joi.object({
 						message: Joi.string().required().example("Login successful."),
 						data: joiAuthenticationData
-					}).required()
+					}).required().unknown(true)
 				}
 			}
 		},

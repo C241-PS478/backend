@@ -108,6 +108,14 @@ export const loginUser = async loginDto => {
 	}
 }
 
+export const loginFirebaseUser = async firebaseToken => {
+	const user = await getFirebaseUserLocalInfo(firebaseToken)
+	return {
+		user: sanitizeUser(user),
+		token: await generateJwtToken(user)
+	}
+}
+
 export const devLoginUser = async username => {
 	let user = await prisma.user.findUnique({
 		where: {

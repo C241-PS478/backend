@@ -6,19 +6,21 @@ import { sanitizeUser } from '../utils/auth.js'
 
 admin.initializeApp()
 
+const auth = admin.auth()
+
 export const getFirebaseUserRecord = async token => {
-	const decodedToken = await admin.auth().verifyIdToken(token)
+	console.log(token)
+	const decodedToken = await auth.verifyIdToken(token)
 
 	const userId = decodedToken.uid
 
-	const user = await admin.auth().getUser(userId)
+	const user = await auth.getUser(userId)
 
 	return user
 }
 
 export const getFirebaseUserLocalInfo = async token => {
 	const firebaseUserRecord = await getFirebaseUserRecord(token)
-	console.log("firebaseUserRecord", firebaseUserRecord)
 	const user = await prisma.user.findFirst({
 		where: {
 			firebaseId: firebaseUserRecord.uid
