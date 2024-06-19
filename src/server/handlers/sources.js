@@ -3,10 +3,8 @@ import hapi from "@hapi/hapi"
 import { prisma } from "../../services/databaseConnector.js"
 import { generateWrongParameterResponse } from "./index.js"
 import { getReverseGeocode } from "../../services/googleMapsApi.js"
-import admin from 'firebase-admin'
+import { db } from "../../services/firestoreConnector.js"
 
-
-export const db = admin.firestore()
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
@@ -101,7 +99,7 @@ export const createSourceHandler = async (request, h) => {
 
 	if (!predictionIot.exists) {
 		const response = h.response({
-			message: "Iot Prediction not found.",
+			message: "Prediction not found.",
 		})
 		response.code(400)
 		return response

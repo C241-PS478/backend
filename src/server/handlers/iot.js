@@ -1,8 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import hapi from "@hapi/hapi"
-import admin from 'firebase-admin'
-
-export const db = admin.firestore()
+import { db } from "../../services/firestoreConnector"
 
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
@@ -70,7 +68,6 @@ export const getAllPredictionsIotHandler = async (request, h) => {
     });
 
     const response = h.response({
-        message: 'Fetched all IoT predictions successfully.',
         data: predictionsIot
     });
 
@@ -127,9 +124,9 @@ export const getPredictionIotHandler = async (request, h) => {
 
 	if (!predictionIot.exists) {
 		const response = h.response({
-			message: "Iot Prediction not found.",
+			message: "Prediction not found.",
 		})
-		response.code(400)
+		response.code(404)
 		return response
 	}
 
@@ -154,7 +151,7 @@ export const updatePredictionIotHandler = async (request, h) => {
             const response = h.response({
                 message: "Prediction not found.",
             });
-            response.code(400);
+            response.code(404);
             return response;
         }
 
@@ -209,9 +206,9 @@ export const deletePredictionIotHandler = async (request, h) => {
 
         if (!predictionIot.exists) {
             const response = h.response({
-                message: "IoT Prediction with the given ID isn't found.",
+                message: "Prediction with the given ID isn't found.",
             });
-            response.code(400);
+            response.code(404);
             return response;
         }
 
@@ -227,7 +224,7 @@ export const deletePredictionIotHandler = async (request, h) => {
         await docRef.delete();
 
         const response = h.response({
-            message: "IoT prediction deleted."
+            message: "Prediction deleted."
         });
         response.code(200); 
         return response;

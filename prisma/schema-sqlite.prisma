@@ -56,44 +56,45 @@ model WaterPrediction {
   imageUrl    String
   prediction  Float
   dateCreated DateTime      @default(now())
-  waterSource WaterSource[]
+  sources     WaterSource[]
 }
 
 // Geolocation of Water Sources and Quantities
 
 model WaterSource {
-  id                  String               @id @default(uuid())
-  author              User?                @relation(fields: [authorId], references: [id])
-  authorId            String?
-  dateCreated         DateTime             @default(now())
-  dateModified        DateTime?
-  address             Address              @relation(fields: [addressId], references: [id])
-  description         String               @default("")
-  addressId           String
-  waterPrediction     WaterPrediction      @relation(fields: [waterPredictionId], references: [id])
-  waterPredictionId   String
-  waterSourceLikes    WaterSourcesLike[]
-  waterSourceComments WaterSourceComment[]
+  id              String               @id @default(uuid())
+  author          User?                @relation(fields: [authorId], references: [id])
+  authorId        String?
+  dateCreated     DateTime             @default(now())
+  dateModified    DateTime?
+  address         Address              @relation(fields: [addressId], references: [id])
+  description     String               @default("")
+  addressId       String
+  prediction      WaterPrediction?     @relation(fields: [predictionId], references: [id])
+  predictionId    String?
+  likes           WaterSourcesLike[]
+  comments        WaterSourceComment[]
+  predictionIotId String?
 }
 
 model WaterSourcesLike {
-  waterSource   WaterSource @relation(fields: [waterSourceId], references: [id])
-  waterSourceId String
-  user          User        @relation(fields: [userId], references: [id])
-  userId        String
+  source   WaterSource @relation(fields: [sourceId], references: [id])
+  sourceId String
+  user     User        @relation(fields: [userId], references: [id])
+  userId   String
 
-  @@id([waterSourceId, userId])
+  @@id([sourceId, userId])
 }
 
 model WaterSourceComment {
-  id            String      @id @default(uuid())
-  author        User?       @relation(fields: [authorId], references: [id])
-  authorId      String?
-  dateCreated   DateTime    @default(now())
-  dateModified  DateTime?
-  content       String
-  waterSource   WaterSource @relation(fields: [waterSourceId], references: [id])
-  waterSourceId String
+  id           String      @id @default(uuid())
+  author       User?       @relation(fields: [authorId], references: [id])
+  authorId     String?
+  dateCreated  DateTime    @default(now())
+  dateModified DateTime?
+  content      String
+  source       WaterSource @relation(fields: [sourceId], references: [id])
+  sourceId     String
 }
 
 // Articles (Berita)
