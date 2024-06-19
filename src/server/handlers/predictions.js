@@ -2,7 +2,7 @@
 import hapi from "@hapi/hapi"
 import { prisma } from "../../services/databaseConnector.js"
 import { generateWrongParameterResponse } from "./index.js"
-import { uploadBufferToCloudStorage } from "../../services/cloudStorageConnector.js"
+import { deleteFileFromCloudStorage, uploadBufferToCloudStorage } from "../../services/cloudStorageConnector.js"
 
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
@@ -217,12 +217,36 @@ export const updatePredictionHandler = async (request, h) => {
 		return response
 	}
 
+	let newImageUrl = undefined
+
+	if (prediction.imageUrl && prediction.imageUrl !== prediction.imageUrl) {
+		await deleteFileFromCloudStorage(prediction.imageUrl)
+		newImageUrl = prediction.imageUrl
+	}
+
+	if (request.payload.image) {
+		const image = request.payload.image
+
+		if (!image) {
+			const response = h.response({
+				message: "No image supplied.",
+			})
+			response.code(400)
+			return response
+		}
+
+		let filename = image.hapi.filename
+		filename = `${Date.now()}${filename.substring(filename.lastIndexOf("."))}`
+
+		newImageUrl = await uploadBufferToCloudStorage(image, `prediction-images/${filename}`, )
+	}
+
 	prediction = await prisma.waterPrediction.update({
 		where: {
 			id: request.params.id
 		},
 		data: {
-			"imageUrl": request.payload.imageUrl,
+			"imageUrl": newImageUrl,
 			"prediction": request.payload.prediction,
 		}
 	})

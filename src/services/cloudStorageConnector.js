@@ -12,16 +12,14 @@ export const uploadBufferToCloudStorage = async (buffer, filePath) => {
 
 export const deleteFileFromCloudStorage = async url => {
 	if (!url) {
-		throw new Error('URL is required')
+		return
+	}
+
+	if (!url.startsWith(`https://storage.googleapis.com/${bucketName}`)) {
+		return
 	}
 	
-	const urlSplitted = url.split('/')
+	const filePath = url.replace(`https://storage.googleapis.com/${bucketName}/`, '')
 
-	if (!urlSplitted.length < 5) {
-		throw new Error('Invalid URL')
-	}
-	const destinationFilePath = urlSplitted.slice(4).join('/')
-	const bucketName = urlSplitted[3]
-
-	await storage.bucket(bucketName).file(`prediction-images/${destinationFilePath}`).delete()
+	await storage.bucket(bucketName).file(filePath).delete()
 }

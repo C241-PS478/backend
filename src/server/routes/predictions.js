@@ -44,8 +44,21 @@ export default [
 		path: "/predictions",
 		handler: createPredictionHandler,
 		options: {
+			payload: {
+				allow: 'multipart/form-data',
+				multipart: true,
+				output: 'stream',
+				parse: true
+			},
 			auth: 'simple',
-			tags: ['api', 'predictions']
+			tags: ['api', 'predictions'],
+			validate: {
+				payload: Joi.object({
+					image: Joi.binary(),
+					imageUrl: Joi.string(),
+					prediction: Joi.number().required(),
+				})
+			}
 		}
 	},
 	{
@@ -61,8 +74,21 @@ export default [
 		path: "/predictions/{id}",
 		handler: updatePredictionHandler,
 		options: {
+			payload: {
+				allow: 'multipart/form-data',
+				multipart: true,
+				output: 'stream',
+				parse: true
+			},
 			auth: 'simple',
-			tags: ['api', 'predictions']
+			tags: ['api', 'predictions'],
+			validate: {
+				payload: Joi.object({
+					image: Joi.binary(),
+					imageUrl: Joi.string(),
+					prediction: Joi.number(),
+				})
+			}
 		}
 	},
 	{
