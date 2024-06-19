@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import hapi from "@hapi/hapi"
-import { db } from "../../services/firestoreConnector"
+import { db } from "../../services/firestoreConnector.js"
 
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
