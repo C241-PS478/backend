@@ -1,4 +1,5 @@
 import { createPredictionHandler, deletePredictionHandler, getAllPredictionsHandler, getPredictionHandler, predictHandler, updatePredictionHandler } from "../handlers/predictions.js"
+import Joi from "joi"
 
 export default [
 	{
@@ -21,7 +22,21 @@ export default [
 		path: "/predictions",
 		handler: getAllPredictionsHandler,
 		options: {
-			tags: ['api', 'predictions']
+			tags: ['api', 'predictions'],
+			validate: {
+				query: Joi.object({
+					page: Joi.number().integer().min(0).default(0),
+					predictionGt: Joi.number().integer().min(0),
+					predictionLt: Joi.number().integer().max(1),
+					predictionGte: Joi.number().integer().min(0),
+					predictionLte: Joi.number().integer().max(1),
+					dateCreatedGt: Joi.date().iso(),
+					dateCreatedLt: Joi.date().iso(),
+					dateCreatedGte: Joi.date().iso(),
+					dateCreatedLte: Joi.date().iso(),
+					authorId: Joi.string().guid(),
+				}),
+			}
 		},
 	},
 	{

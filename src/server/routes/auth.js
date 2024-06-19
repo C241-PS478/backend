@@ -61,6 +61,12 @@ const routes = [
 			tags: ['api', 'auth'],
 			description: "Login",
 			notes: "Login with username and password.",
+			validate: {
+				payload: Joi.object({
+					username: Joi.string().required().description("Username"),
+					password: Joi.string().required().description("Password"),
+				})
+			},
 			response: {
 				status: {
 					200: Joi.object({

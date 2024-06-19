@@ -29,11 +29,24 @@ export const predictHandler = async (request, h) => {
 	// formData.append('image', image, filename)
 	formData.append('image', new Blob([image._data], { type: image.hapi.headers['content-type'] }), filename)
 
-	const mlResponseRaw = await fetch(`${process.env.ML_API_URL}/clean-water/with-extraction`, {
-		method: "POST",
-		body: formData
-	})
+	let mlResponseRaw
 
+	try {
+		await fetch(`${process.env.ML_API_URL}/clean-water/with-extraction`, {
+			method: "POST",
+			body: formData
+		})
+	} catch (e) {
+		if (e?.response?.status === 400) {
+			const response = h.response({
+				message: `Invalid image: ${e.response.data.message}`
+			})
+			response.code(400)
+			return response
+		}
+		throw e
+	}
+				
 	const mlResponse = await mlResponseRaw.json()
 
 	const prediction = mlResponse.data.prediction
@@ -68,25 +81,6 @@ export const predictHandler = async (request, h) => {
  */
 export const getAllPredictionsHandler = async (request, h) => {
 
-	if (request.query?.page && isNaN(request.query.page))
-		return generateWrongParameterResponse(h, "page")
-	if (request.query?.["predictionGt"] && isNaN(request.query["predictionGt"]))
-		return generateWrongParameterResponse(h, "predictionGt")
-	if (request.query?.["predictionLt"] && isNaN(request.query["predictionLt"]))
-		return generateWrongParameterResponse(h, "predictionLt")
-	if (request.query?.["predictionGte"] && isNaN(request.query["predictionGte"]))
-		return generateWrongParameterResponse(h, "predictionGte")
-	if (request.query?.["predictionLte"] && isNaN(request.query["predictionLte"]))
-		return generateWrongParameterResponse(h, "predictionLte")
-	if (request.query?.["dateCreatedGt"] && isNaN(request.query["dateCreatedGt"]))
-		return generateWrongParameterResponse(h, "dateCreatedGt")
-	if (request.query?.["dateCreatedLt"] && isNaN(request.query["dateCreatedLt"]))
-		return generateWrongParameterResponse(h, "dateCreatedLt")
-	if (request.query?.["dateCreatedGte"] && isNaN(request.query["dateCreatedGte"]))
-		return generateWrongParameterResponse(h, "dateCreatedGte")
-	if (request.query?.["dateCreatedLte"] && isNaN(request.query["dateCreatedLte"]))
-		return generateWrongParameterResponse(h, "dateCreatedLte")
-
 	const predictions = await prisma.waterPrediction.findMany({
 		where: {
 			author: {
@@ -104,6 +98,7 @@ export const getAllPredictionsHandler = async (request, h) => {
 				gte: request.query['dateCreatedGte'] ? new Date(request.query['dateCreatedGte']) : undefined,
 				lte: request.query['dateCreatedLte'] ? new Date(request.query['dateCreatedLte']) : undefined
 			},
+			authorId: request.query.authorId
 		},
 		skip: (request.query.page || 0) * 10,
 		take: 10,
