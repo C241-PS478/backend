@@ -73,6 +73,7 @@ model WaterSource {
   predictionId String
   likes        WaterSourcesLike[]
   comments     WaterSourceComment[]
+  predictionIotId String?
 }
 
 model WaterSourcesLike {

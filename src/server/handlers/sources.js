@@ -3,8 +3,10 @@ import hapi from "@hapi/hapi"
 import { prisma } from "../../services/databaseConnector.js"
 import { generateWrongParameterResponse } from "./index.js"
 import { getReverseGeocode } from "../../services/googleMapsApi.js"
+import admin from 'firebase-admin'
 
 
+export const db = admin.firestore()
 /**
  * @param {hapi.Request<ReqRefDefaults>} request 
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
@@ -72,7 +74,6 @@ export const getSourceHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const createSourceHandler = async (request, h) => {
-
 	const reverseGeocodeResult = await getReverseGeocode(request.payload.lat, request.payload.long)
 
 	let addressCreate = {
@@ -95,6 +96,17 @@ export const createSourceHandler = async (request, h) => {
 		} catch (e) {}
 	}
 
+	const docRef = db.collection('iot-predictions').doc(request.payload.predictionIotId);
+    const predictionIot = await docRef.get();
+
+	if (!predictionIot.exists) {
+		const response = h.response({
+			message: "Iot Prediction not found.",
+		})
+		response.code(400)
+		return response
+	}
+
 	const source = await prisma.waterSource.create({
 		data: {
 			address: addressCreate,
@@ -108,7 +120,8 @@ export const createSourceHandler = async (request, h) => {
 				connect: {
 					id: request.payload.predictionId
 				}
-			}
+			},
+			predictionIotId: request.payload.predictionIotId
 		},
 		include: {
 			address: true,
