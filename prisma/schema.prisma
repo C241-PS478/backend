@@ -61,18 +61,19 @@ model WaterPrediction {
 // Geolocation of Water Sources and Quantities
 
 model WaterSource {
-  id           String               @id @default(uuid())
-  author       User?                @relation(fields: [authorId], references: [id])
-  authorId     String?
-  dateCreated  DateTime             @default(now())
-  dateModified DateTime?
-  address      Address              @relation(fields: [addressId], references: [id])
-  description  String               @default("")
-  addressId    String
-  prediction   WaterPrediction      @relation(fields: [predictionId], references: [id])
-  predictionId String
-  likes        WaterSourcesLike[]
-  comments     WaterSourceComment[]
+  id              String               @id @default(uuid())
+  author          User?                @relation(fields: [authorId], references: [id])
+  authorId        String?
+  dateCreated     DateTime             @default(now())
+  dateModified    DateTime?
+  address         Address              @relation(fields: [addressId], references: [id])
+  description     String               @default("")
+  addressId       String
+  prediction      WaterPrediction?     @relation(fields: [predictionId], references: [id])
+  predictionId    String?
+  likes           WaterSourcesLike[]
+  comments        WaterSourceComment[]
+  predictionIotId String?
 }
 
 model WaterSourcesLike {

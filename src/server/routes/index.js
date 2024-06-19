@@ -3,6 +3,7 @@ import predictions from "./predictions.js"
 import test from "./test.js"
 import auth from "./auth.js"
 import sources from "./sources.js"
+import iot from "./iot.js"
 
 export default [
 	{
@@ -17,5 +18,6 @@ export default [
 	...auth,
 	...test,
 	...predictions,
-	...sources
+	...sources,
+	...iot
 ]
