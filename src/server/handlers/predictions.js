@@ -32,7 +32,7 @@ export const predictHandler = async (request, h) => {
 	let mlResponseRaw
 
 	try {
-		await fetch(`${process.env.ML_API_URL}/clean-water/with-extraction`, {
+		mlResponseRaw = await fetch(`${process.env.ML_API_URL}/clean-water/with-extraction`, {
 			method: "POST",
 			body: formData
 		})
@@ -118,12 +118,31 @@ export const getAllPredictionsHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const createPredictionHandler = async (request, h) => {
+	let imageUrl = request.payload.imageUrl
+	
+	if (request.payload.image) {
+		const image = request.payload.image
+
+		if (!image) {
+			const response = h.response({
+				message: "No image supplied.",
+			})
+			response.code(400)
+			return response
+		}
+
+		let filename = image.hapi.filename
+		filename = `${Date.now()}${filename.substring(filename.lastIndexOf("."))}`
+
+		imageUrl = await uploadBufferToCloudStorage(image, `prediction-images/${filename}`, )
+	}
+	
 	let prediction
 	try {
 		prediction = await prisma.waterPrediction.create({
 			data: {
 				"authorId": request.auth.artifacts.id,
-				"imageUrl": request.payload.imageUrl,
+				"imageUrl": imageUrl,
 				"prediction": request.payload.prediction,
 			}
 		})
