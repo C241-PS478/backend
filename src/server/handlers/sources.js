@@ -72,6 +72,45 @@ export const getSourceHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const createSourceHandler = async (request, h) => {
+	if (request.payload.predictionId && request.payload.predictionIotId) {
+		const response = h.response({
+			message: "You can't have both predictionId and predictionIotId.",
+		})
+
+		response.code(400)
+		return response
+	}
+
+	if (request.payload.predictionIotId) {
+		const docRef = db.collection('iot-predictions').doc(request.payload.predictionIotId);
+		const predictionIot = await docRef.get();
+	
+		if (!predictionIot.exists) {
+			const response = h.response({
+				message: "Prediction not found.",
+			})
+			response.code(400)
+			return response
+		}	
+	}
+
+	// Made it here so it doesn't need to reverse geocode
+	if (request.payload.predictionId) {
+		const prediction = await prisma.waterPrediction.findUnique({
+			where: {
+				id: request.payload.predictionId
+			}
+		})
+
+		if (!prediction) {
+			const response = h.response({
+				message: "Prediction not found.",
+			})
+			response.code(400)
+			return response
+		}
+	}
+
 	const reverseGeocodeResult = await getReverseGeocode(request.payload.lat, request.payload.long)
 
 	let addressCreate = {
@@ -92,17 +131,6 @@ export const createSourceHandler = async (request, h) => {
 			addressCreate.create.address = result.formatted_address
 			break
 		} catch (e) {}
-	}
-
-	const docRef = db.collection('iot-predictions').doc(request.payload.predictionIotId);
-    const predictionIot = await docRef.get();
-
-	if (!predictionIot.exists) {
-		const response = h.response({
-			message: "Prediction not found.",
-		})
-		response.code(400)
-		return response
 	}
 
 	const source = await prisma.waterSource.create({
