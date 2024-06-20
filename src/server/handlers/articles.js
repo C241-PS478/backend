@@ -1,9 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import hapi from "@hapi/hapi"
 import { prisma } from "../../services/databaseConnector.js"
-import { generateWrongParameterResponse } from "./index.js"
-import { getReverseGeocode } from "../../services/googleMapsApi.js"
-import { db } from "../../services/firestoreConnector.js"
 import { uploadBufferToCloudStorage } from "../../services/cloudStorageConnector.js"
 
 /**
@@ -71,7 +68,16 @@ export const getArticleHandler = async (request, h) => {
  */
 export const createArticleHandler = async (request, h) => {
 	// TODO image upload
-	
+
+	if (request.auth.artifacts.isAdmin === false) {
+		const response = h.response({
+			message: "You are not allowed to create articles.",
+		})
+		response.code(403)
+		return response
+	}
+
+
 	const article = await prisma.article.create({
 		data: {
 			author: {
@@ -124,7 +130,7 @@ export const updateArticleHandler = async (request, h) => {
 		const response = h.response({
 			message: "You are not allowed to update this article.",
 		})
-		response.code(401)
+		response.code(403)
 		return response
 	}
 
