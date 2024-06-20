@@ -23,6 +23,7 @@ export const getAllSourcesHandler = async (request, h) => {
 		include: {
 			address: true,
 			author: true,
+			prediction: true
 		},
 	})
 
@@ -51,6 +52,7 @@ export const getSourceHandler = async (request, h) => {
 		include: {
 			address: true,
 			author: true,
+			prediction: true,
 		},
 	})
 
@@ -139,6 +141,10 @@ export const createSourceHandler = async (request, h) => {
 		} catch (e) {}
 	}
 
+	let predictionConnect
+
+	if (request.payload.predictionId) predictionConnect = { connect: { id: request.payload.predictionId } }
+
 	const source = await prisma.waterSource.create({
 		data: {
 			address: addressCreate,
@@ -148,17 +154,13 @@ export const createSourceHandler = async (request, h) => {
 					id: request.auth.artifacts.id
 				}
 			},
-			prediction: {
-				connect: {
-					id: request.payload.predictionId
-				}
-			},
+			prediction: predictionConnect,
 			predictionIotId: request.payload.predictionIotId
 		},
 		include: {
 			address: true,
 			author: true,
-			prediction: true,
+			prediction: true
 		},
 	})
 
