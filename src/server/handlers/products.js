@@ -8,9 +8,9 @@ import { uploadBufferToCloudStorage } from "../../services/cloudStorageConnector
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
  * @returns {hapi.ResponseObject}
  */
-export const getAllArticlesHandler = async (request, h) => {
+export const getAllProductsHandler = async (request, h) => {
 
-	const articles = await prisma.article.findMany({
+	const products = await prisma.product.findMany({
 		skip: (request.query.page || 0) * 10,
 		take: 10,
 		include: {
@@ -18,10 +18,10 @@ export const getAllArticlesHandler = async (request, h) => {
 		},
 	})
 
-	delete article?.author?.password
+	delete product?.author?.password
 
 	const response = h.response({
-		data: articles
+		data: products
 	})
 
 	response.code(200)
@@ -33,28 +33,23 @@ export const getAllArticlesHandler = async (request, h) => {
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
  * @returns {hapi.ResponseObject}
  */
-export const getArticleHandler = async (request, h) => {
-	const article = await prisma.waterArticle.findUnique({
+export const getProductHandler = async (request, h) => {
+	const product = await prisma.waterProduct.findUnique({
 		where: {
 			id: request.params.id
 		},
-		include: {
-			author: true,
-		},
 	})
 
-	delete article?.author?.password
-
-	if (!article) {
+	if (!product) {
 		const response = h.response({
-			message: "Article not found.",
+			message: "Product not found.",
 		})
 		response.code(404)
 		return response
 	}
 
 	const response = h.response({
-		data: article
+		data: product
 	})
 
 	response.code(200)
@@ -66,39 +61,29 @@ export const getArticleHandler = async (request, h) => {
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
  * @returns {hapi.ResponseObject}
  */
-export const createArticleHandler = async (request, h) => {
+export const createProductHandler = async (request, h) => {
 	// TODO image upload
 
 	if (request.auth.artifacts.isAdmin === false) {
 		const response = h.response({
-			message: "You are not allowed to create articles.",
+			message: "You are not allowed to create products.",
 		})
 		response.code(403)
 		return response
 	}
 
-
-	const article = await prisma.article.create({
+	const product = await prisma.product.create({
 		data: {
-			author: {
-				connect: {
-					id: request.auth.artifacts.id
-				}
-			},
-			content: request.payload.content,
-			title: request.payload.title,
-
-		},
-		include: {
-			author: true,
-			prediction: true,
+			name: request.payload.name,
+			category: request.payload.category,
+			price: Number(request.payload.price),
+			url: request.payload.url,
+			imageUrl: request.payload.imageUrl,
 		},
 	})
 
-	delete article?.author?.password
-
 	const response = h.response({
-		data: article
+		data: product
 	})
 
 	response.code(201)
@@ -111,24 +96,24 @@ export const createArticleHandler = async (request, h) => {
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
  * @returns {hapi.ResponseObject}
  */
-export const updateArticleHandler = async (request, h) => {
-	let article = await prisma.article.findUnique({
+export const updateProductHandler = async (request, h) => {
+	let product = await prisma.product.findUnique({
 		where: {
 			id: request.params.id
 		}
 	})
 
-	if (!article) {
+	if (!product) {
 		const response = h.response({
-			message: "Article not found.",
+			message: "Product not found.",
 		})
 		response.code(404)
 		return response
 	}
 
-	if (article.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
+	if (request.auth.artifacts.isAdmin === false) {
 		const response = h.response({
-			message: "You are not allowed to update this article.",
+			message: "You are not allowed to update this product.",
 		})
 		response.code(403)
 		return response
@@ -136,27 +121,25 @@ export const updateArticleHandler = async (request, h) => {
 
 	// TODO image upload
 
-	article = await prisma.article.update({
+	product = await prisma.product.update({
 		where: {
 			id: request.params.id
 		},
 		data: {
-			title: request.payload.title,
-			content: request.payload.content,
-			dateModified: new Date().toISOString()
-		},
-		include: {
-			address: true,
-			author: true,
+			name: request.payload.name,
+			category: request.payload.category,
+			price: Number(request.payload.price),
+			url: request.payload.url,
+			imageUrl: request.payload.imageUrl,
 		},
 	})
 
 	
-	delete article?.author?.password
+	delete product?.author?.password
 
 	const response = h.response({
-		message: "Article updated.",
-		data: article
+		message: "Product updated.",
+		data: product
 	})
 
 	response.code(200)
@@ -168,37 +151,37 @@ export const updateArticleHandler = async (request, h) => {
  * @param {hapi.ResponseToolkit<ReqRefDefaults>} h 
  * @returns {hapi.ResponseObject}
  */
-export const deleteArticleHandler = async (request, h) => {
-	let article = await prisma.article.findUnique({
+export const deleteProductHandler = async (request, h) => {
+	let product = await prisma.product.findUnique({
 		where: {
 			id: request.params.id
 		}
 	})
 
-	if (!article) {
+	if (!product) {
 		const response = h.response({
-			message: "Article not found.",
+			message: "Product not found.",
 		})
 		response.code(404)
 		return response
 	}
 
-	if (article.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
+	if (request.auth.artifacts.isAdmin === false) {
 		const response = h.response({
-			message: "You are not allowed to delete this article.",
+			message: "You are not allowed to delete this product.",
 		})
 		response.code(403)
 		return response
 	}
 
-	article = await prisma.waterArticle.delete({
+	product = await prisma.waterProduct.delete({
 		where: {
 			id: request.params.id
 		}
 	})
 
 	const response = h.response({
-		message: "Article deleted."
+		message: "Product deleted."
 	})
 
 	response.code(204)
