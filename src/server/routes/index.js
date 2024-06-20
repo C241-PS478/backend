@@ -4,6 +4,7 @@ import test from "./test.js"
 import auth from "./auth.js"
 import sources from "./sources.js"
 import iot from "./iot.js"
+import articles from "./articles.js"
 
 export default [
 	{
@@ -19,5 +20,6 @@ export default [
 	...test,
 	...predictions,
 	...sources,
-	...iot
+	...iot,
+	...articles
 ]

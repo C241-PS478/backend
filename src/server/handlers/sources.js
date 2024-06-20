@@ -17,7 +17,7 @@ export const getAllSourcesHandler = async (request, h) => {
 
 	// TODO add query on radius
 
-	const source = await prisma.waterSource.findMany({
+	const sources = await prisma.waterSource.findMany({
 		skip: (request.query.page || 0) * 10,
 		take: 10,
 		include: {
@@ -26,8 +26,12 @@ export const getAllSourcesHandler = async (request, h) => {
 		},
 	})
 
+	sources.forEach(source => {
+		delete source?.author?.password
+	})
+
 	const response = h.response({
-		data: source
+		data: sources
 	})
 
 	response.code(200)
@@ -49,6 +53,8 @@ export const getSourceHandler = async (request, h) => {
 			author: true,
 		},
 	})
+
+	delete source?.author?.password
 
 	if (!source) {
 		const response = h.response({
@@ -156,6 +162,8 @@ export const createSourceHandler = async (request, h) => {
 		},
 	})
 
+	delete source?.author?.password
+
 	const response = h.response({
 		data: source
 	})
@@ -234,6 +242,8 @@ export const updateSourceHandler = async (request, h) => {
 		},
 	})
 
+	delete source?.author?.password
+
 	const response = h.response({
 		message: "Source updated.",
 		data: source
@@ -249,21 +259,18 @@ export const updateSourceHandler = async (request, h) => {
  * @returns {hapi.ResponseObject}
  */
 export const deleteSourceHandler = async (request, h) => {
-	let source
-	try {
-		source = await prisma.waterSource.findUnique({
-			where: {
-				id: request.params.id
-			}
-		})
-	} catch (e) {
-		if (e?.code === "P2025") {
-			const response = h.response({
-				message: "Source not found.",
-			})
-			response.code(404)
-			return response
+	let source = await prisma.waterSource.findUnique({
+		where: {
+			id: request.params.id
 		}
+	})
+	
+	if (!source) {
+		const response = h.response({
+			message: "Source not found.",
+		})
+		response.code(404)
+		return response
 	}
 
 	if (source.authorId !== request.auth.artifacts.id && request.auth.artifacts.isAdmin === false) {
@@ -306,6 +313,10 @@ export const getSourceCommentsHandler = async (request, h) => {
 		include: {
 			author: true
 		}
+	})
+
+	comments.forEach(comment => {
+		delete comment?.author?.password
 	})
 
 	const response = h.response({
@@ -353,6 +364,8 @@ export const addSourceCommentHandler = async (request, h) => {
 		}
 	}
 
+	delete comment?.author?.password
+
 	const response = h.response({
 		data: comment
 	})
@@ -376,6 +389,8 @@ export const getSourceCommentHandler = async (request, h) => {
 			author: true
 		}
 	})
+
+	delete comment?.author?.password
 
 	if (!comment) {
 		const response = h.response({
