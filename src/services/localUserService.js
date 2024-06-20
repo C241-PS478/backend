@@ -88,12 +88,15 @@ export const registerUser = async registerDto => {
 }
 
 export const loginUser = async loginDto => {
-	const user = await prisma.user.findUnique({
+	const user = await prisma.user.findFirst({
 		where: {
-			username: loginDto.username
+			OR: [
+				{ username: loginDto.username },
+				{ email: loginDto.username }
+			]
 		}
 	})
-
+	
 	if (!user) {
 		throw new Error('User not found')
 	}
