@@ -26,7 +26,7 @@ export const loginHandler = async (request, h) => {
 	}
 
 	const response = h.response({
-		message: "Login successful!",
+		message: "Login successful.",
 		data
 	})
 
