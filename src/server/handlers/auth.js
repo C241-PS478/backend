@@ -46,12 +46,13 @@ export const registerHandler = async (request, h) => {
 			email: request.payload.email,
 			username: request.payload.username,
 			name: request.payload.name,
-			password: request.payload.password
+			password: request.payload.password,
+			phoneNumber: request.payload.phoneNumber,
 		})
 	} catch (e) {
-		if (e.message === "Username already taken") {
+		if (e.code === "P2002") {
 			const response = h.response({
-				message: "Username already taken.",
+				message: "Username and/or email already taken."
 			})
 			response.code(400)
 			return response

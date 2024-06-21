@@ -77,7 +77,8 @@ export const registerUser = async registerDto => {
 			email: registerDto.email,
 			username: registerDto.username,
 			name: registerDto.name,
-			password: await bcrypt.hash(registerDto.password, 10)
+			password: await bcrypt.hash(registerDto.password, 10),
+			phoneNumber: registerDto.phoneNumber
 		}
 	})
 
@@ -127,7 +128,7 @@ export const devLoginUser = async username => {
 	})
 
 	if (user && !user.email.endsWith('dev.waterwise.bangkit.academy')) {
-		throw new Error('User already exists')
+		throw new Error('Real user already exists')
 	}
 
 	if (!user) {

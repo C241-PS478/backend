@@ -38,6 +38,7 @@ const routes = [
 					password: Joi.string().required().description("Password"),
 					name: Joi.string().required().description("Name"),
 					email: Joi.string().email().required().description("Email"),
+					phoneNumber: Joi.string().allow("").description("Phone number"),
 				})
 			},
 			response: {
