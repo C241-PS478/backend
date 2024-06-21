@@ -185,7 +185,7 @@ export const updatePredictionIotHandler = async (request, h) => {
         return response;
     } catch (error) {
         const response = h.response({
-            message: 'Error updating data please try later.',
+            message: 'Error updating data. Please try later.',
             error: error.toString()
         });
 
@@ -230,7 +230,7 @@ export const deletePredictionIotHandler = async (request, h) => {
         return response;
     } catch (error) {
         const response = h.response({
-            message: 'Error deleting data please try later.',
+            message: 'Error deleting data. Please try later.',
             error: error.toString()
         });
 
